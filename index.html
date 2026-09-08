@@ -1,713 +1,539 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>우리들의 자율 마을 & 법정 시스템</title>
-  <style>
-    :root {
-      --main-bg: #f7f9fa;
-      --police-blue: #1a365d;
-      --accent-gold: #f59e0b;
-      --border-color: #cbd5e1;
-      --text-main: #334155;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seonwoo's Laboratory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF3ED;
+    --paper-2:#E5EBE3;
+    --ink:#1B2A3C;
+    --ink-soft:#4B5A6B;
+    --line:#C9D6CE;
+    --marker:#FFC94A;
+    --teal:#1E8F80;
+    --teal-dark:#146357;
+    --violet:#6C5CE7;
+    --violet-dark:#4E3FC4;
+    --radius:14px;
+    --maxw:1080px;
+  }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
 
-    body {
-      background-color: var(--main-bg);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      position: relative;
-    }
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/100% 34px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/34px 100%,
+      var(--paper);
+    background-blend-mode:normal;
+    color:var(--ink);
+    font-family:'Gowun Dodum', sans-serif;
+    line-height:1.7;
+  }
+  /* 그리드 라인은 아주 은은하게 */
+  body{ background-color:var(--paper); }
+  body::before{ content:none; }
 
-    /* 상단 헤더 & 쫄라맨 */
-    header {
-      width: 100%;
-      max-width: 900px;
-      padding: 20px 20px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
+  h1,h2,h3,.wordmark{ font-family:'Do Hyeon', sans-serif; letter-spacing:.5px; }
 
-    /* 햄버거 메뉴 버튼 */
-    .menu-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 28px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--police-blue);
-      padding: 5px 10px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-    .menu-btn:hover {
-      background: #e2e8f0;
-    }
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+  button{ font-family:inherit; }
 
-    /* 쫄라맨 SVG */
-    .stickman-container {
-      margin-bottom: 8px;
-    }
+  :focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:3px;
+  }
 
-    /* 가로 구분선 */
-    .divider-line {
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #94a3b8, var(--police-blue), #94a3b8);
-      border-radius: 2px;
-      margin: 12px 0 16px;
-    }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
 
-    /* 상단 메인 네비게이션 */
-    nav.main-nav {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-    }
+  /* ---------- 헤더 ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(239,243,237,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:2px solid var(--ink);
+  }
+  header .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:68px;
+  }
+  .wordmark{
+    display:flex; align-items:center; gap:8px;
+    font-size:1.25rem; color:var(--ink); text-decoration:none;
+  }
+  .wordmark svg{ width:26px; height:26px; }
 
-    .nav-tab {
-      padding: 10px 20px;
-      border: 2px solid var(--police-blue);
-      background-color: #ffffff;
-      color: var(--police-blue);
-      border-radius: 25px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+  .hamburger{
+    width:44px; height:44px;
+    border:2px solid var(--ink);
+    border-radius:10px;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .hamburger .bars{
+    position:relative; width:20px; height:14px;
+  }
+  .hamburger .bars span{
+    position:absolute; left:0; width:100%; height:2px; background:var(--ink);
+    transition:transform .25s ease, opacity .25s ease, top .25s ease;
+  }
+  .hamburger .bars span:nth-child(1){ top:0; }
+  .hamburger .bars span:nth-child(2){ top:6px; }
+  .hamburger .bars span:nth-child(3){ top:12px; }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(1){ top:6px; transform:rotate(45deg); }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(2){ opacity:0; }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(3){ top:6px; transform:rotate(-45deg); }
 
-    .nav-tab:hover, .nav-tab.active {
-      background-color: var(--police-blue);
-      color: #ffffff;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    }
+  /* ---------- 드로어 메뉴 ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(27,42,60,0.45);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+    z-index:45;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
 
-    /* 사이드 햄버거 서랍 메뉴 */
-    .side-drawer {
-      position: fixed;
-      top: 0;
-      left: -320px;
-      width: 300px;
-      height: 100%;
-      background: #ffffff;
-      box-shadow: 4px 0 15px rgba(0,0,0,0.15);
-      transition: left 0.3s ease;
-      z-index: 1000;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-    }
-    .side-drawer.open {
-      left: 0;
-    }
+  .drawer{
+    position:fixed; top:0; right:0; height:100%;
+    width:min(320px, 85vw);
+    background:var(--paper-2);
+    border-left:2px solid var(--ink);
+    transform:translateX(100%);
+    transition:transform .3s ease;
+    z-index:50;
+    display:flex; flex-direction:column;
+    padding:22px 20px;
+  }
+  .drawer.open{ transform:translateX(0); }
+  .drawer-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .drawer-top span{ font-family:'Do Hyeon',sans-serif; font-size:1.1rem; }
+  .drawer-close{
+    width:36px; height:36px; border:2px solid var(--ink); border-radius:8px;
+    background:var(--paper); cursor:pointer; font-size:1rem; line-height:1;
+  }
+  .drawer nav{ display:flex; flex-direction:column; gap:6px; }
+  .drawer nav a{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 12px;
+    text-decoration:none;
+    border-radius:10px;
+    font-size:1.05rem;
+    color:var(--ink);
+  }
+  .drawer nav a:hover, .drawer nav a:focus-visible{ background:var(--paper); }
+  .drawer nav a svg{ width:20px; height:20px; flex:none; }
 
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 12px;
-    }
+  /* ---------- 히어로 ---------- */
+  .hero{
+    padding:64px 0 56px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:2px solid var(--ink);
+  }
+  .hero .wrap{ position:relative; z-index:1; }
+  .hero .eyebrow-tag{
+    display:inline-block;
+    background:var(--marker);
+    color:var(--ink);
+    padding:5px 12px;
+    border-radius:6px;
+    font-family:'Gowun Dodum',sans-serif;
+    font-size:.9rem;
+    transform:rotate(-2deg);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 4rem);
+    margin:0 0 14px;
+    color:var(--ink);
+  }
+  .hero p{
+    max-width:52ch;
+    font-size:1.1rem;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+  .hero-doodle{
+    position:absolute; right:-40px; top:20px; width:280px; opacity:.9;
+  }
+  .scroll-hint{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:.95rem; color:var(--ink-soft);
+  }
 
-    .drawer-menu {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+  /* ---------- 섹션 공통 ---------- */
+  section{ padding:64px 0; border-bottom:2px solid var(--ink); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ margin-bottom:34px; max-width:60ch; }
+  .section-head h2{ font-size:2rem; margin:0 0 10px; }
+  .section-head p{ color:var(--ink-soft); margin:0; }
 
-    .drawer-menu li button {
-      width: 100%;
-      text-align: left;
-      padding: 12px 16px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #1e293b;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+  /* ---------- 소개 ---------- */
+  #about .about-grid{
+    display:grid; grid-template-columns:200px 1fr; gap:40px; align-items:start;
+  }
+  .badge{
+    width:180px; height:180px;
+    background:var(--teal);
+    clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--paper);
+    font-family:'Do Hyeon',sans-serif;
+    font-size:3rem;
+  }
+  .tags{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+  .tags span{
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:.9rem;
+  }
 
-    .drawer-menu li button:hover {
-      background: var(--police-blue);
-      color: #ffffff;
-    }
+  /* ---------- 카드 그리드 ---------- */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+    gap:20px;
+  }
+  .card{
+    display:block;
+    text-decoration:none;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    padding:20px;
+    color:var(--ink);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover, .card:focus-visible{
+    transform:translateY(-4px);
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .card .tag-num{
+    display:inline-block;
+    font-size:.8rem;
+    background:var(--marker);
+    color:var(--ink);
+    padding:3px 9px;
+    border-radius:6px;
+    margin-bottom:12px;
+    transform:rotate(-1.5deg);
+  }
+  .card.creative .tag-num{ background:#DCD6FB; }
+  .card h3{ font-size:1.15rem; margin:0 0 8px; font-family:'Gowun Dodum',sans-serif; font-weight:700;}
+  .card p{ margin:0 0 14px; color:var(--ink-soft); font-size:.95rem; }
+  .card .go{
+    font-size:.9rem; font-weight:700;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    color:var(--teal-dark);
+  }
+  .card.creative .go{ color:var(--violet-dark); }
+  .card .genre{
+    display:inline-block; font-size:.8rem; color:var(--ink-soft);
+    margin-bottom:8px;
+  }
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      z-index: 999;
-    }
-    .overlay.show {
-      display: block;
-    }
+  .empty-note{
+    grid-column:1/-1;
+    border:2px dashed var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    color:var(--ink-soft);
+    font-size:.95rem;
+  }
 
-    /* 메인 콘텐츠 영역 */
-    main {
-      width: 100%;
-      max-width: 900px;
-      padding: 20px;
-      flex: 1;
-    }
+  /* ---------- 유튜브 ---------- */
+  .yt-feature{
+    display:flex; flex-wrap:wrap; align-items:center; gap:24px;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    padding:28px;
+    margin-bottom:24px;
+  }
+  .yt-feature .play-icon{
+    width:64px; height:64px; flex:none;
+    background:var(--ink);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .yt-feature .play-icon svg{ width:24px; height:24px; }
+  .yt-feature .info{ flex:1; min-width:200px; }
+  .yt-feature h3{ margin:0 0 6px; font-size:1.3rem; font-family:'Gowun Dodum',sans-serif; font-weight:700;}
+  .yt-feature p{ margin:0; color:var(--ink-soft); }
+  .btn{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--paper);
+    text-decoration:none;
+    padding:12px 22px;
+    border-radius:10px;
+    font-size:.95rem;
+    font-weight:700;
+    border:2px solid var(--ink);
+  }
+  .btn:hover, .btn:focus-visible{ background:var(--paper); color:var(--ink); }
 
-    .content-card {
-      background: #ffffff;
-      padding: 28px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-      display: none;
-    }
+  .video-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+  .video-list li a{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:10px;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .video-list li a:hover, .video-list li a:focus-visible{ background:var(--paper); }
 
-    .content-card.active {
-      display: block;
-    }
+  footer{
+    padding:30px 0 50px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:.9rem;
+  }
 
-    /* 버튼 및 입력창 공통 */
-    button.btn-action {
-      background: var(--police-blue);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button.btn-action:hover {
-      opacity: 0.9;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0 16px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-    }
-
-    /* 1. 우리들의 세금 & 경찰 게시판 */
-    .tax-box {
-      background: #eff6ff;
-      border-left: 5px solid var(--police-blue);
-      padding: 16px;
-      margin-bottom: 20px;
-      border-radius: 4px;
-    }
-
-    /* 2. 그레이머 */
-    .grammer-box {
-      background: #fefce8;
-      border: 2px dashed #ca8a04;
-      padding: 20px;
-      border-radius: 8px;
-    }
-
-    /* 3. 주민등록 & 주민 목록 */
-    .resident-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    .resident-table th, .resident-table td {
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      text-align: center;
-    }
-    .resident-table th {
-      background: #f1f5f9;
-    }
-
-    /* 4. 주민번호 특별 공간 (검정 배경 & 하얀 글자) */
-    .black-vault {
-      background-color: #0b0f19;
-      color: #f8fafc;
-      padding: 30px;
-      border-radius: 12px;
-      border: 2px solid #ef4444;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
-    }
-    .vault-warning {
-      color: #f87171;
-      font-weight: bold;
-      margin: 15px 0;
-      padding: 12px;
-      border: 1px dashed #ef4444;
-      background: rgba(239, 68, 68, 0.1);
-      border-radius: 6px;
-      line-height: 1.6;
-    }
-    .secret-list {
-      margin: 20px 0;
-      list-style: none;
-    }
-    .secret-list li {
-      padding: 10px;
-      border-bottom: 1px solid #334155;
-      font-family: monospace;
-      font-size: 16px;
-    }
-
-    /* 5. 아동보호 스크롤 영역 (100줄) */
-    .scroll-list-box {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid var(--border-color);
-      padding: 15px;
-      background: #f8fafc;
-      border-radius: 6px;
-      line-height: 1.8;
-    }
-
-    /* 6. 지구특공대 */
-    .commando-box {
-      text-align: center;
-      padding: 30px;
-      background: #f0fdf4;
-      border: 2px solid #16a34a;
-      border-radius: 10px;
-    }
-    .badge-icon {
-      font-size: 60px;
-      margin-bottom: 15px;
-    }
-
-    /* 강제 퇴장 모달 */
-    .ban-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #ffffff;
-      border: 4px solid #ef4444;
-      border-radius: 12px;
-      padding: 30px;
-      z-index: 2000;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      display: none;
-      max-width: 420px;
-      width: 90%;
-    }
-  </style>
+  @media (max-width:640px){
+    #about .about-grid{ grid-template-columns:1fr; }
+    .badge{ width:130px; height:130px; font-size:2.2rem; }
+    .hero-doodle{ display:none; }
+    section{ padding:48px 0; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- 햄버거 오버레이 & 드로어 -->
-  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-  <aside class="side-drawer" id="sideDrawer">
-    <div class="drawer-header">
-      <h3>🏛️ 마을 특별 메뉴</h3>
-      <button class="menu-btn" style="position:static;" onclick="toggleMenu()">✕</button>
-    </div>
-    <ul class="drawer-menu">
-      <li><button onclick="switchView('view-resident')">1. 주민등록</button></li>
-      <li><button onclick="switchView('view-child')">2. 아동보호 (100대 실천)</button></li>
-      <li><button onclick="switchView('view-commando')">3. 지구특공대</button></li>
-      <li><button onclick="switchView('view-vault')">4. 주민 번호 관리실 (보안)</button></li>
-      <li><button onclick="switchView('view-board')">5. 경찰 전용 게시판</button></li>
-      <li><button onclick="switchView('view-penalty')">6. 벌점 관리</button></li>
-    </ul>
-  </aside>
-
-  <!-- 헤더 영역 -->
   <header>
-    <button class="menu-btn" onclick="toggleMenu()" title="전체 메뉴 열기">☰</button>
-
-    <!-- 쫄라맨 사람 일러스트 (SVG) -->
-    <div class="stickman-container">
-      <svg width="70" height="90" viewBox="0 0 100 120">
-        <!-- 머리 -->
-        <circle cx="50" cy="20" r="15" stroke="#1e293b" stroke-width="4" fill="#ffffff" />
-        <!-- 눈과 미소 -->
-        <circle cx="45" cy="18" r="2" fill="#1e293b" />
-        <circle cx="55" cy="18" r="2" fill="#1e293b" />
-        <path d="M 45 25 Q 50 29 55 25" stroke="#1e293b" stroke-width="2" fill="none" />
-        <!-- 몸통 -->
-        <line x1="50" y1="35" x2="50" y2="75" stroke="#1e293b" stroke-width="4" />
-        <!-- 팔 -->
-        <line x1="50" y1="48" x2="25" y2="35" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
-        <line x1="50" y1="48" x2="75" y2="35" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
-        <!-- 다리 -->
-        <line x1="50" y1="75" x2="30" y2="110" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
-        <line x1="50" y1="75" x2="70" y2="110" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
-      </svg>
+    <div class="wrap">
+      <a href="#top" class="wordmark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3h6M10 3v5l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3.5L14 8V3"/>
+        </svg>
+        Seonwoo's Laboratory
+      </a>
+      <button class="hamburger" id="menuBtn" aria-expanded="false" aria-controls="drawer" aria-label="메뉴 열기">
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
     </div>
-
-    <!-- 가로로 길게 쭉 그어진 표시선 -->
-    <div class="divider-line"></div>
-
-    <!-- 상단 4대 메인 탭 -->
-    <nav class="main-nav">
-      <button class="nav-tab active" onclick="switchView('view-cheer')">공감</button>
-      <button class="nav-tab" onclick="switchView('view-tax')">우리들의 세금</button>
-      <button class="nav-tab" onclick="switchView('view-grammer')">그레이머</button>
-      <button class="nav-tab" onclick="switchView('view-resident')">법정 주민</button>
-    </nav>
   </header>
 
-  <!-- 메인 본문 콘텐츠 -->
-  <main>
+  <div class="overlay" id="overlay"></div>
 
-    <!-- [공감] 탭 -->
-    <section id="view-cheer" class="content-card active">
-      <h2>❤️ 따뜻한 마을 공감터</h2>
-      <p style="margin: 15px 0; line-height: 1.6;">서로를 응원하고 격려하는 공간입니다. 상대방을 존중하는 고운 말을 사용해주세요!</p>
-      <button class="btn-action" onclick="alert('친구들에게 따뜻한 응원의 공감 하트(❤️)를 보냈습니다!')">응원 공감 보내기</button>
-    </section>
+  <aside class="drawer" id="drawer" role="dialog" aria-label="사이트 메뉴" aria-hidden="true">
+    <div class="drawer-top">
+      <span>메뉴</span>
+      <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">✕</button>
+    </div>
+    <nav>
+      <a href="#about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+        선우 소개
+      </a>
+      <a href="#webprojects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8"/></svg>
+        선우가 개발한 웹페이지
+      </a>
+      <a href="#creative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4Z"/><path d="M8 8h8M8 12h8"/></svg>
+        선우가 창작한 만화·소설
+      </a>
+      <a href="#youtube">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></svg>
+        유튜브 링크
+      </a>
+    </nav>
+  </aside>
 
-    <!-- [우리들의 세금] 탭 -->
-    <section id="view-tax" class="content-card">
-      <h2>💰 우리들의 세금 현황</h2>
-      <div class="tax-box">
-        <h3>이번 달 모인 세금: <span id="tax-total" style="color:#2563eb; font-size:24px;">15,400</span> 원</h3>
-        <p>📢 <strong>이번 달 공지:</strong> 모인 세금은 마을 도서관 새 책 구매 및 놀이터 정비에 사용됩니다.</p>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow-tag">계속 업데이트 중인 실험실</span>
+        <h1>Seonwoo's Laboratory</h1>
+        <p>코드를 조합하고, 이야기를 그리고, 영상을 만드는&nbsp;
+           선우의 작업실입니다. 파이썬과 HTML로 만든 웹페이지부터
+           직접 쓴 만화와 소설, 유튜브 영상까지 이곳에 모아둡니다.</p>
+        <span class="scroll-hint">오른쪽 위 메뉴를 눌러 둘러보세요 ↗</span>
       </div>
-      <button class="btn-action" onclick="switchView('view-board')">경찰 전용 세금 공지 게시판 바로가기 →</button>
+      <svg class="hero-doodle" viewBox="0 0 200 200" fill="none" stroke="#1B2A3C" stroke-width="2" stroke-linecap="round">
+        <path d="M80 20h30M85 20v30l-25 55a12 12 0 0 0 11 17h48a12 12 0 0 0 11-17l-25-55V20"/>
+        <path d="M70 95h50"/>
+        <circle cx="150" cy="40" r="3" fill="#1B2A3C"/>
+        <path d="M140 60c10 5 20 5 30 15" />
+        <path d="M20 150c15-10 25-10 35 0s20 10 35 0"/>
+      </svg>
     </section>
 
-    <!-- [그레이머] 탭 -->
-    <section id="view-grammer" class="content-card">
-      <h2>🎮 그레이머 (재미있는 규칙 지키기)</h2>
-      <div class="grammer-box">
-        <p><strong>💡 그레이머란?</strong></p>
-        <p>딱딱하게 벌만 주는 곳이 아니라, "우리가 법과 규칙을 얼마나 기발하고 재미있게 지켰는지"를 나누는 놀이터입니다!</p>
-        <hr style="margin:12px 0;">
-        <h4>🏆 이달의 명예 그레이머 실천 사례</h4>
-        <ul style="margin-left: 20px; margin-top: 8px;">
-          <li>복도에서 뛰지 않고 닌자처럼 발소리 없이 걷기 미션 완수</li>
-          <li>간식 나눠줄 때 정확한 비율로 공정 분배 재판 놀이 성공</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- [법정 주민 / 주민등록] 탭 -->
-    <section id="view-resident" class="content-card">
-      <h2>📜 법정 주민등록 센터</h2>
-      <p>마을에 등록된 공식 주민 명부입니다.</p>
-
-      <table class="resident-table">
-        <thead>
-          <tr>
-            <th>성명</th>
-            <th>식별 고유번호</th>
-            <th>상태</th>
-          </tr>
-        </thead>
-        <tbody id="resident-tbody">
-          <tr>
-            <td>최윤영</td>
-            <td>2464-****</td>
-            <td>정상 (우수 시민)</td>
-          </tr>
-          <tr>
-            <td>박민기</td>
-            <td>2258-****</td>
-            <td>정상 (우수 시민)</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div style="margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px;">
-        <h3>➕ 새로운 주민 추가</h3>
-        <input type="text" id="new-name" placeholder="이름(성명)을 입력하세요">
-        <div style="display:flex; gap:10px;">
-          <button class="btn-action" onclick="generateResidentId()">주민번호 생성</button>
-          <button class="btn-action" style="background:#16a34a;" onclick="addNewResident()">주민 등록 완료</button>
+    <section id="about">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우 소개</h2>
+          <p>실험실 주인을 소개합니다.</p>
         </div>
-        <p id="generated-id-display" style="margin-top:10px; font-weight:bold; color:#2563eb;"></p>
-      </div>
-    </section>
-
-    <!-- [아동보호 100줄 수칙] 햄버거 메뉴 -->
-    <section id="view-child" class="content-card">
-      <h2>🛡️ 아동보호 및 범죄 예방 100대 실천 수칙</h2>
-      <p style="margin-bottom:10px;">모든 어린이는 존중받아야 하며, 안전하게 보호받을 권리가 있습니다.</p>
-      <div class="scroll-list-box" id="child-rules-container">
-        <!-- JS로 100줄 자동 생성 -->
-      </div>
-    </section>
-
-    <!-- [지구특공대] 햄버거 메뉴 -->
-    <section id="view-commando" class="content-card">
-      <div class="commando-box">
-        <div class="badge-icon">👮‍♂️ 지구특공대 본부 🚓</div>
-        <h2>"우리들은 정의로운 경찰에게 충성합시다!"</h2>
-        <p style="margin: 15px 0; color: #15803d; font-weight: bold;">
-          지구특공대는 24시간 마을의 안전과 평화를 지킵니다.
-        </p>
-        <button class="btn-action" style="background:#16a34a;" onclick="salutePolice()">경례 및 충성 서약하기</button>
-      </div>
-    </section>
-
-    <!-- [주민번호 관리실 - 검정 배경 화면] 햄버거 메뉴 -->
-    <section id="view-vault" class="content-card" style="background:transparent; border:none; padding:0;">
-      <div class="black-vault">
-        <h2 style="color:#ffffff;">🔒 주민 번호 보안실 (Black Vault)</h2>
-        <div class="vault-warning">
-          ⚠️ <strong>경고 및 공지:</strong> 이 전체 웹페이지는 법정으로 관리하기 때문에, 규칙을 위반하거나 법을 지키지 않을 시 즉시 <strong>강제 퇴장</strong> 조치될 수 있습니다!
-        </div>
-
-        <ul class="secret-list" id="vault-list">
-          <li>최윤영 - 식별 코드: 2464-**** (보호 중)</li>
-          <li>박민기 - 식별 코드: 2258-**** (보호 중)</li>
-        </ul>
-
-        <div style="margin-top:20px; display:flex; gap:10px;">
-          <button class="btn-action" style="background:#ef4444;" onclick="triggerBanTest()">법률 위반 테스트 (강제 퇴장 발동)</button>
-          <button class="btn-action" style="background:#3b82f6;" onclick="alert('법을 모범적으로 준수하여 강제 퇴장 위험이 없습니다.')">법 준수 서약 확인</button>
+        <div class="about-grid">
+          <div class="badge">선우</div>
+          <div>
+            <p>
+              안녕하세요, 저는 <strong>선우</strong>입니다.
+              바이브 코딩으로 웹페이지 만드는 걸 좋아하고,
+              파이썬과 HTML로 이것저것 만들어보는 중이에요.
+              여기 자기소개 문장을 선우가 직접 채워보세요.
+            </p>
+            <div class="tags">
+              <span>Python</span>
+              <span>HTML / CSS</span>
+              <span>웹 개발</span>
+              <span>만화 · 소설</span>
+              <span>유튜브</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- [경찰 전용 게시판] 햄버거 메뉴 -->
-    <section id="view-board" class="content-card">
-      <h2>📢 경찰 전용 공지 게시판</h2>
-      <p style="color:#dc2626; margin-bottom:15px;">※ 일반 주민은 읽기만 가능하며, 올리기는 <strong>경찰 인증</strong>이 필요합니다.</p>
-
-      <div style="border:1px solid #e2e8f0; padding:15px; border-radius:8px; margin-bottom:20px; background:#f8fafc;">
-        <h4>✍️ 경찰관 글 올리기</h4>
-        <input type="text" id="board-title" placeholder="공지 제목">
-        <textarea id="board-content" rows="3" placeholder="내용을 작성하세요..."></textarea>
-        <button class="btn-action" onclick="postNotice()">올리기 (전송)</button>
-      </div>
-
-      <h3>게시판 목록</h3>
-      <div id="board-posts" style="margin-top:10px; display:flex; flex-direction:column; gap:10px;">
-        <div style="padding:10px; border-bottom:1px solid #e2e8f0;">
-          <strong>[지구특공대 공지]</strong> 오늘 방과 후 순찰 예정 구역 안내 (작성자: 경찰청)
+    <section id="webprojects">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우가 개발한 웹페이지</h2>
+          <p>지금까지 만든 웹페이지 목록입니다. 카드를 누르면 해당 페이지로 이동해요.</p>
         </div>
+        <div class="card-grid" id="webGrid"></div>
       </div>
     </section>
 
-    <!-- [벌점 관리] 햄버거 메뉴 -->
-    <section id="view-penalty" class="content-card">
-      <h2>⚖️ 주민 벌점 종합 관리소</h2>
-      <p style="margin-bottom: 15px;">벌점 부과 및 차감은 오직 공정한 경찰관만 실행할 수 있습니다.</p>
-
-      <table class="resident-table">
-        <thead>
-          <tr>
-            <th>주민 이름</th>
-            <th>현재 누적 벌점</th>
-            <th>경찰 벌점 조정</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>최윤영</td>
-            <td><span id="penalty-choi" style="font-weight:bold; color:#ef4444;">0</span> 점</td>
-            <td>
-              <button class="btn-action" onclick="adjustPenalty('choi', 1)">+1점 부과</button>
-              <button class="btn-action" style="background:#64748b;" onclick="adjustPenalty('choi', -1)">-1점 감면</button>
-            </td>
-          </tr>
-          <tr>
-            <td>박민기</td>
-            <td><span id="penalty-park" style="font-weight:bold; color:#ef4444;">0</span> 점</td>
-            <td>
-              <button class="btn-action" onclick="adjustPenalty('park', 1)">+1점 부과</button>
-              <button class="btn-action" style="background:#64748b;" onclick="adjustPenalty('park', -1)">-1점 감면</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <section id="creative">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우가 창작한 만화·소설</h2>
+          <p>직접 쓰고 그린 이야기들이에요.</p>
+        </div>
+        <div class="card-grid" id="creativeGrid"></div>
+      </div>
     </section>
 
+    <section id="youtube">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>유튜브 링크</h2>
+          <p>선우의 채널과 영상을 확인해보세요.</p>
+        </div>
+        <div class="yt-feature">
+          <div class="play-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m8 5 12 7-12 7Z" fill="#EFF3ED"/></svg>
+          </div>
+          <div class="info">
+            <h3 id="ytChannelName">선우의 유튜브 채널</h3>
+            <p id="ytChannelDesc">채널 소개 문구를 여기에 적어주세요.</p>
+          </div>
+          <a class="btn" id="ytChannelLink" href="https://www.youtube.com/" target="_blank" rel="noopener">채널 방문하기</a>
+        </div>
+        <ul class="video-list" id="videoList"></ul>
+      </div>
+    </section>
   </main>
 
-  <!-- 강제 퇴장 팝업 모달 -->
-  <div class="ban-modal" id="banModal">
-    <h3 style="color:#ef4444; font-size:22px; margin-bottom:10px;">🚨 강제 퇴장 경고!</h3>
-    <p style="margin-bottom:15px; line-height:1.5;">
-      웹페이지 관리 법정을 위반하여 시스템에서 <strong>강제 퇴장</strong>되었습니다!<br>
-      법과 규칙을 지켜야만 마을 시스템을 정상 이용할 수 있습니다.
-    </p>
-    <button class="btn-action" style="background:#1e293b;" onclick="closeBanModal()">반성하고 규칙 준수하기 (복귀)</button>
-  </div>
+  <footer>
+    <div class="wrap">© 2026 Seonwoo's Laboratory</div>
+  </footer>
 
-  <script>
-    // 1. 햄버거 서랍 메뉴 열고 닫기
-    function toggleMenu() {
-      const drawer = document.getElementById('sideDrawer');
-      const overlay = document.getElementById('overlay');
-      drawer.classList.toggle('open');
-      overlay.classList.toggle('show');
+<script>
+  /* ============================================================
+     아래 데이터만 수정하면 카드가 자동으로 만들어져요.
+     title / desc / url 을 선우가 만든 실제 내용으로 바꿔주세요.
+     ============================================================ */
+
+  // 선우가 개발한 웹페이지 목록
+  const webPages = [
+    { title: "예: 나만의 계산기", desc: "파이썬으로 만든 간단한 계산기 웹페이지예요.", url: "https://example.com" },
+    { title: "예: 오늘의 날씨판", desc: "HTML/CSS로 만든 날씨 안내 페이지예요.", url: "https://example.com" },
+    { title: "예: 미니 게임", desc: "자바스크립트로 만든 작은 게임이에요.", url: "https://example.com" },
+  ];
+
+  // 선우가 창작한 만화·소설 목록
+  const creativeWorks = [
+    { title: "예: 나의 첫 만화", genre: "만화 · 4컷", desc: "짧은 이야기를 담은 4컷 만화예요.", url: "https://example.com" },
+    { title: "예: 짧은 소설", genre: "소설 · 단편", desc: "직접 쓴 단편 소설이에요.", url: "https://example.com" },
+  ];
+
+  // 유튜브 대표 영상 목록 (비워두면 자동으로 안내 문구만 표시돼요)
+  const videos = [
+    // { title: "예: 첫 영상", url: "https://www.youtube.com/watch?v=xxxxx" },
+  ];
+
+  function pad(n){ return String(n).padStart(2, "0"); }
+
+  function renderCards(list, containerId, extraClass, numLabel){
+    const grid = document.getElementById(containerId);
+    if(!list.length){
+      grid.innerHTML = `<div class="empty-note">아직 등록된 작품이 없어요. 스크립트의 데이터를 채워보세요.</div>`;
+      return;
     }
+    grid.innerHTML = list.map((item, i) => `
+      <a class="card ${extraClass}" href="${item.url}" target="_blank" rel="noopener">
+        <span class="tag-num">${numLabel} ${pad(i+1)}</span>
+        ${item.genre ? `<span class="genre">${item.genre}</span>` : ""}
+        <h3>${item.title}</h3>
+        <p>${item.desc}</p>
+        <span class="go">바로가기</span>
+      </a>
+    `).join("");
+  }
 
-    // 2. 탭 및 페이지 화면 전환
-    function switchView(viewId) {
-      // 모든 본문 닫기
-      document.querySelectorAll('.content-card').forEach(el => {
-        el.classList.remove('active');
-      });
-      // 선택한 본문 열기
-      const target = document.getElementById(viewId);
-      if (target) target.classList.add('active');
+  renderCards(webPages, "webGrid", "", "실험");
+  renderCards(creativeWorks, "creativeGrid", "creative", "작품");
 
-      // 상단 메인 탭 활성화 상태 동기화
-      document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.getAttribute('onclick').includes(viewId)) {
-          tab.classList.add('active');
-        }
-      });
+  const videoList = document.getElementById("videoList");
+  if(videos.length){
+    videoList.innerHTML = videos.map(v => `
+      <li><a href="${v.url}" target="_blank" rel="noopener"><span>${v.title}</span><span>▶</span></a></li>
+    `).join("");
+  }
 
-      // 모바일 등 서랍 메뉴 열려있으면 닫기
-      document.getElementById('sideDrawer').classList.remove('open');
-      document.getElementById('overlay').classList.remove('show');
-    }
+  /* ---------- 햄버거 드로어 동작 ---------- */
+  const menuBtn = document.getElementById("menuBtn");
+  const drawer = document.getElementById("drawer");
+  const overlay = document.getElementById("overlay");
+  const drawerClose = document.getElementById("drawerClose");
 
-    // 3. 아동보호 100줄 실천 수칙 자동 생성
-    const childRulesBox = document.getElementById('child-rules-container');
-    const baseActionRules = [
-      "모든 아동은 안전한 환경에서 생활할 권리가 있습니다.",
-      "낯선 사람이 동행을 요구할 때는 절대 따라가지 않고 거절합니다.",
-      "길을 걸을 때는 주변을 잘 살피며 스마트폰을 보지 않습니다.",
-      "위험에 처했을 때는 즉시 '도와주세요!'라고 크게 외칩니다.",
-      "친구에게 신체적·언어적 폭력을 행사하지 않습니다.",
-      "인터넷과 SNS에서는 개인정보를 공유하지 않습니다.",
-      "안전벨트를 반드시 착용하고 교통신호를 철저히 지킵니다.",
-      "어려운 일이 생기면 신뢰할 수 있는 경찰관이나 보호자에게 이야기합니다.",
-      "친구의 차이를 존중하고 따돌림을 하지 않습니다.",
-      "혼자 외진 곳이나 위험한 골목길에 가지 않습니다."
-    ];
+  function openDrawer(){
+    drawer.classList.add("open");
+    overlay.classList.add("open");
+    menuBtn.setAttribute("aria-expanded", "true");
+    drawer.setAttribute("aria-hidden", "false");
+  }
+  function closeDrawer(){
+    drawer.classList.remove("open");
+    overlay.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded", "false");
+    drawer.setAttribute("aria-hidden", "true");
+  }
 
-    for (let i = 1; i <= 100; i++) {
-      const p = document.createElement('p');
-      const ruleText = baseActionRules[(i - 1) % baseActionRules.length];
-      p.textContent = `${i}번 실천 수칙: ${ruleText}`;
-      childRulesBox.appendChild(p);
-    }
-
-    // 4. 주민번호 자동 생성 및 등록 기능 (앞자리 표기, 뒷자리 비밀 보호)
-    let tempGeneratedId = "";
-
-    function generateResidentId() {
-      // 앞 4자리 랜덤 숫자 생성
-      const front = Math.floor(1000 + Math.random() * 9000);
-      tempGeneratedId = `${front}-****`;
-      
-      const display = document.getElementById('generated-id-display');
-      display.textContent = `생성된 식별번호: ${tempGeneratedId} (뒷자리는 비밀 보호 처리됨)`;
-    }
-
-    function addNewResident() {
-      const nameInput = document.getElementById('new-name');
-      const name = nameInput.value.trim();
-
-      if (!name) {
-        alert("이름을 입력해주세요!");
-        return;
-      }
-      if (!tempGeneratedId) {
-        alert("먼저 [주민번호 생성] 버튼을 눌러주세요!");
-        return;
-      }
-
-      // 주민 명부 테이블에 추가
-      const tbody = document.getElementById('resident-tbody');
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${name}</td><td>${tempGeneratedId}</td><td>정상 (신규 등록)</td>`;
-      tbody.appendChild(row);
-
-      // 비밀 방에도 추가
-      const vaultList = document.getElementById('vault-list');
-      const li = document.createElement('li');
-      li.textContent = `${name} - 식별 코드: ${tempGeneratedId} (보호 중)`;
-      vaultList.appendChild(li);
-
-      alert(`${name} 님이 법정 주민으로 정상 등록되었습니다.`);
-      nameInput.value = "";
-      document.getElementById('generated-id-display').textContent = "";
-      tempGeneratedId = "";
-    }
-
-    // 5. 지구특공대 경례
-    function salutePolice() {
-      alert("경찰관님께 경례! 충성! 지구특공대원들의 안전을 기원합니다.");
-    }
-
-    // 6. 강제 퇴장 시스템
-    function triggerBanTest() {
-      document.getElementById('banModal').style.display = 'block';
-    }
-
-    function closeBanModal() {
-      document.getElementById('banModal').style.display = 'none';
-      switchView('view-cheer');
-      alert("공감터로 돌아왔습니다. 법을 잘 지키는 훌륭한 시민이 됩시다!");
-    }
-
-    // 7. 경찰 전용 게시판 등록
-    function postNotice() {
-      const isPolice = confirm("[경찰 신원 확인] 당신은 공무 수행 중인 경찰관이 맞습니까?");
-      if (!isPolice) {
-        alert("경찰관만 게시판에 글을 올릴 수 있습니다!");
-        return;
-      }
-
-      const title = document.getElementById('board-title').value.trim();
-      const content = document.getElementById('board-content').value.trim();
-
-      if (!title || !content) {
-        alert("제목과 내용을 모두 작성해주세요.");
-        return;
-      }
-
-      const boardPosts = document.getElementById('board-posts');
-      const postDiv = document.createElement('div');
-      postDiv.style.padding = "10px";
-      postDiv.style.borderBottom = "1px solid #e2e8f0";
-      postDiv.innerHTML = `<strong>[공지] ${title}</strong><br><span style="color:#475569;">${content}</span> (작성자: 지구특공대 경찰)`;
-      
-      boardPosts.prepend(postDiv);
-
-      document.getElementById('board-title').value = "";
-      document.getElementById('board-content').value = "";
-      alert("게시판에 성공적으로 등록되었습니다!");
-    }
-
-    // 8. 벌점 조정 시스템
-    const penalties = { choi: 0, park: 0 };
-
-    function adjustPenalty(person, amount) {
-      const isPolice = confirm("[경찰 인증] 벌점을 조정하시겠습니까?");
-      if (!isPolice) {
-        alert("벌점 관리는 경찰만 권한이 있습니다.");
-        return;
-      }
-
-      penalties[person] = Math.max(0, penalties[person] + amount);
-      document.getElementById(`penalty-${person}`).textContent = penalties[person];
-
-      if (penalties[person] >= 5) {
-        alert(`경고: 벌점이 ${penalties[person]}점에 도달하여 법정 소환 대상이 될 수 있습니다!`);
-      }
-    }
-  </script>
+  menuBtn.addEventListener("click", () => {
+    drawer.classList.contains("open") ? closeDrawer() : openDrawer();
+  });
+  drawerClose.addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") closeDrawer();
+  });
+  drawer.querySelectorAll("nav a").forEach(a => {
+    a.addEventListener("click", closeDrawer);
+  });
+</script>
 </body>
 </html>
