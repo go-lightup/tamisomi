@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seonwoo's Laboratory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF3ED;
+    --paper-2:#E5EBE3;
+    --ink:#1B2A3C;
+    --ink-soft:#4B5A6B;
+    --line:#C9D6CE;
+    --marker:#FFC94A;
+    --teal:#1E8F80;
+    --teal-dark:#146357;
+    --violet:#6C5CE7;
+    --violet-dark:#4E3FC4;
+    --radius:14px;
+    --maxw:1080px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/100% 34px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/34px 100%,
+      var(--paper);
+    background-blend-mode:normal;
+    color:var(--ink);
+    font-family:'Gowun Dodum', sans-serif;
+    line-height:1.7;
+  }
+  /* 그리드 라인은 아주 은은하게 */
+  body{ background-color:var(--paper); }
+  body::before{ content:none; }
+
+  h1,h2,h3,.wordmark{ font-family:'Do Hyeon', sans-serif; letter-spacing:.5px; }
+
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+  button{ font-family:inherit; }
+
+  :focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+
+  /* ---------- 헤더 ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(239,243,237,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:2px solid var(--ink);
+  }
+  header .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:68px;
+  }
+  .wordmark{
+    display:flex; align-items:center; gap:8px;
+    font-size:1.25rem; color:var(--ink); text-decoration:none;
+  }
+  .wordmark svg{ width:26px; height:26px; }
+
+  .hamburger{
+    width:44px; height:44px;
+    border:2px solid var(--ink);
+    border-radius:10px;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .hamburger .bars{
+    position:relative; width:20px; height:14px;
+  }
+  .hamburger .bars span{
+    position:absolute; left:0; width:100%; height:2px; background:var(--ink);
+    transition:transform .25s ease, opacity .25s ease, top .25s ease;
+  }
+  .hamburger .bars span:nth-child(1){ top:0; }
+  .hamburger .bars span:nth-child(2){ top:6px; }
+  .hamburger .bars span:nth-child(3){ top:12px; }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(1){ top:6px; transform:rotate(45deg); }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(2){ opacity:0; }
+  .hamburger[aria-expanded="true"] .bars span:nth-child(3){ top:6px; transform:rotate(-45deg); }
+
+  /* ---------- 드로어 메뉴 ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(27,42,60,0.45);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+    z-index:45;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+
+  .drawer{
+    position:fixed; top:0; right:0; height:100%;
+    width:min(320px, 85vw);
+    background:var(--paper-2);
+    border-left:2px solid var(--ink);
+    transform:translateX(100%);
+    transition:transform .3s ease;
+    z-index:50;
+    display:flex; flex-direction:column;
+    padding:22px 20px;
+  }
+  .drawer.open{ transform:translateX(0); }
+  .drawer-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .drawer-top span{ font-family:'Do Hyeon',sans-serif; font-size:1.1rem; }
+  .drawer-close{
+    width:36px; height:36px; border:2px solid var(--ink); border-radius:8px;
+    background:var(--paper); cursor:pointer; font-size:1rem; line-height:1;
+  }
+  .drawer nav{ display:flex; flex-direction:column; gap:6px; }
+  .drawer nav a{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 12px;
+    text-decoration:none;
+    border-radius:10px;
+    font-size:1.05rem;
+    color:var(--ink);
+  }
+  .drawer nav a:hover, .drawer nav a:focus-visible{ background:var(--paper); }
+  .drawer nav a svg{ width:20px; height:20px; flex:none; }
+
+  /* ---------- 히어로 ---------- */
+  .hero{
+    padding:64px 0 56px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:2px solid var(--ink);
+  }
+  .hero .wrap{ position:relative; z-index:1; }
+  .hero .eyebrow-tag{
+    display:inline-block;
+    background:var(--marker);
+    color:var(--ink);
+    padding:5px 12px;
+    border-radius:6px;
+    font-family:'Gowun Dodum',sans-serif;
+    font-size:.9rem;
+    transform:rotate(-2deg);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 4rem);
+    margin:0 0 14px;
+    color:var(--ink);
+  }
+  .hero p{
+    max-width:52ch;
+    font-size:1.1rem;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+  .hero-doodle{
+    position:absolute; right:-40px; top:20px; width:280px; opacity:.9;
+  }
+  .scroll-hint{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:.95rem; color:var(--ink-soft);
+  }
+
+  /* ---------- 섹션 공통 ---------- */
+  section{ padding:64px 0; border-bottom:2px solid var(--ink); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ margin-bottom:34px; max-width:60ch; }
+  .section-head h2{ font-size:2rem; margin:0 0 10px; }
+  .section-head p{ color:var(--ink-soft); margin:0; }
+
+  /* ---------- 소개 ---------- */
+  #about .about-grid{
+    display:grid; grid-template-columns:200px 1fr; gap:40px; align-items:start;
+  }
+  .badge{
+    width:180px; height:180px;
+    background:var(--teal);
+    clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--paper);
+    font-family:'Do Hyeon',sans-serif;
+    font-size:3rem;
+  }
+  .tags{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+  .tags span{
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:.9rem;
+  }
+
+  /* ---------- 카드 그리드 ---------- */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+    gap:20px;
+  }
+  .card{
+    display:block;
+    text-decoration:none;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    padding:20px;
+    color:var(--ink);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover, .card:focus-visible{
+    transform:translateY(-4px);
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .card .tag-num{
+    display:inline-block;
+    font-size:.8rem;
+    background:var(--marker);
+    color:var(--ink);
+    padding:3px 9px;
+    border-radius:6px;
+    margin-bottom:12px;
+    transform:rotate(-1.5deg);
+  }
+  .card.creative .tag-num{ background:#DCD6FB; }
+  .card h3{ font-size:1.15rem; margin:0 0 8px; font-family:'Gowun Dodum',sans-serif; font-weight:700;}
+  .card p{ margin:0 0 14px; color:var(--ink-soft); font-size:.95rem; }
+  .card .go{
+    font-size:.9rem; font-weight:700;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    color:var(--teal-dark);
+  }
+  .card.creative .go{ color:var(--violet-dark); }
+  .card .genre{
+    display:inline-block; font-size:.8rem; color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+
+  .empty-note{
+    grid-column:1/-1;
+    border:2px dashed var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    color:var(--ink-soft);
+    font-size:.95rem;
+  }
+
+  /* ---------- 유튜브 ---------- */
+  .yt-feature{
+    display:flex; flex-wrap:wrap; align-items:center; gap:24px;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    padding:28px;
+    margin-bottom:24px;
+  }
+  .yt-feature .play-icon{
+    width:64px; height:64px; flex:none;
+    background:var(--ink);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .yt-feature .play-icon svg{ width:24px; height:24px; }
+  .yt-feature .info{ flex:1; min-width:200px; }
+  .yt-feature h3{ margin:0 0 6px; font-size:1.3rem; font-family:'Gowun Dodum',sans-serif; font-weight:700;}
+  .yt-feature p{ margin:0; color:var(--ink-soft); }
+  .btn{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--paper);
+    text-decoration:none;
+    padding:12px 22px;
+    border-radius:10px;
+    font-size:.95rem;
+    font-weight:700;
+    border:2px solid var(--ink);
+  }
+  .btn:hover, .btn:focus-visible{ background:var(--paper); color:var(--ink); }
+
+  .video-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+  .video-list li a{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:10px;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .video-list li a:hover, .video-list li a:focus-visible{ background:var(--paper); }
+
+  footer{
+    padding:30px 0 50px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:.9rem;
+  }
+
+  @media (max-width:640px){
+    #about .about-grid{ grid-template-columns:1fr; }
+    .badge{ width:130px; height:130px; font-size:2.2rem; }
+    .hero-doodle{ display:none; }
+    section{ padding:48px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap">
+      <a href="#top" class="wordmark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3h6M10 3v5l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3.5L14 8V3"/>
+        </svg>
+        Seonwoo's Laboratory
+      </a>
+      <button class="hamburger" id="menuBtn" aria-expanded="false" aria-controls="drawer" aria-label="메뉴 열기">
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="drawer" role="dialog" aria-label="사이트 메뉴" aria-hidden="true">
+    <div class="drawer-top">
+      <span>메뉴</span>
+      <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">✕</button>
+    </div>
+    <nav>
+      <a href="#about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+        선우 소개
+      </a>
+      <a href="#webprojects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8"/></svg>
+        선우가 개발한 웹페이지
+      </a>
+      <a href="#creative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4Z"/><path d="M8 8h8M8 12h8"/></svg>
+        선우가 창작한 만화·소설
+      </a>
+      <a href="#youtube">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></svg>
+        유튜브 링크
+      </a>
+    </nav>
+  </aside>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow-tag">계속 업데이트 중인 실험실</span>
+        <h1>Seonwoo's Laboratory</h1>
+        <p>코드를 조합하고, 이야기를 그리고, 영상을 만드는&nbsp;
+           선우의 작업실입니다. 파이썬과 HTML로 만든 웹페이지부터
+           직접 쓴 만화와 소설, 유튜브 영상까지 이곳에 모아둡니다.</p>
+        <span class="scroll-hint">오른쪽 위 메뉴를 눌러 둘러보세요 ↗</span>
+      </div>
+      <svg class="hero-doodle" viewBox="0 0 200 200" fill="none" stroke="#1B2A3C" stroke-width="2" stroke-linecap="round">
+        <path d="M80 20h30M85 20v30l-25 55a12 12 0 0 0 11 17h48a12 12 0 0 0 11-17l-25-55V20"/>
+        <path d="M70 95h50"/>
+        <circle cx="150" cy="40" r="3" fill="#1B2A3C"/>
+        <path d="M140 60c10 5 20 5 30 15" />
+        <path d="M20 150c15-10 25-10 35 0s20 10 35 0"/>
+      </svg>
+    </section>
+
+    <section id="about">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우 소개</h2>
+          <p>실험실 주인을 소개합니다.</p>
+        </div>
+        <div class="about-grid">
+          <div class="badge">선우</div>
+          <div>
+            <p>
+              안녕하세요, 저는 <strong>선우</strong>입니다.
+              바이브 코딩으로 웹페이지 만드는 걸 좋아하고,
+              파이썬과 HTML로 이것저것 만들어보는 중이에요.
+              여기 자기소개 문장을 선우가 직접 채워보세요.
+            </p>
+            <div class="tags">
+              <span>Python</span>
+              <span>HTML / CSS</span>
+              <span>웹 개발</span>
+              <span>만화 · 소설</span>
+              <span>유튜브</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="webprojects">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우가 개발한 웹페이지</h2>
+          <p>지금까지 만든 웹페이지 목록입니다. 카드를 누르면 해당 페이지로 이동해요.</p>
+        </div>
+        <div class="card-grid" id="webGrid"></div>
+      </div>
+    </section>
+
+    <section id="creative">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>선우가 창작한 만화·소설</h2>
+          <p>직접 쓰고 그린 이야기들이에요.</p>
+        </div>
+        <div class="card-grid" id="creativeGrid"></div>
+      </div>
+    </section>
+
+    <section id="youtube">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>유튜브 링크</h2>
+          <p>선우의 채널과 영상을 확인해보세요.</p>
+        </div>
+        <div class="yt-feature">
+          <div class="play-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m8 5 12 7-12 7Z" fill="#EFF3ED"/></svg>
+          </div>
+          <div class="info">
+            <h3 id="ytChannelName">선우의 유튜브 채널</h3>
+            <p id="ytChannelDesc">채널 소개 문구를 여기에 적어주세요.</p>
+          </div>
+          <a class="btn" id="ytChannelLink" href="https://www.youtube.com/" target="_blank" rel="noopener">채널 방문하기</a>
+        </div>
+        <ul class="video-list" id="videoList"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">© 2026 Seonwoo's Laboratory</div>
+  </footer>
+
+<script>
+  /* ============================================================
+     아래 데이터만 수정하면 카드가 자동으로 만들어져요.
+     title / desc / url 을 선우가 만든 실제 내용으로 바꿔주세요.
+     ============================================================ */
+
+  // 선우가 개발한 웹페이지 목록
+  const webPages = [
+    { title: "예: 나만의 계산기", desc: "파이썬으로 만든 간단한 계산기 웹페이지예요.", url: "https://example.com" },
+    { title: "예: 오늘의 날씨판", desc: "HTML/CSS로 만든 날씨 안내 페이지예요.", url: "https://example.com" },
+    { title: "예: 미니 게임", desc: "자바스크립트로 만든 작은 게임이에요.", url: "https://example.com" },
+  ];
+
+  // 선우가 창작한 만화·소설 목록
+  const creativeWorks = [
+    { title: "예: 나의 첫 만화", genre: "만화 · 4컷", desc: "짧은 이야기를 담은 4컷 만화예요.", url: "https://example.com" },
+    { title: "예: 짧은 소설", genre: "소설 · 단편", desc: "직접 쓴 단편 소설이에요.", url: "https://example.com" },
+  ];
+
+  // 유튜브 대표 영상 목록 (비워두면 자동으로 안내 문구만 표시돼요)
+  const videos = [
+    // { title: "예: 첫 영상", url: "https://www.youtube.com/watch?v=xxxxx" },
+  ];
+
+  function pad(n){ return String(n).padStart(2, "0"); }
+
+  function renderCards(list, containerId, extraClass, numLabel){
+    const grid = document.getElementById(containerId);
+    if(!list.length){
+      grid.innerHTML = `<div class="empty-note">아직 등록된 작품이 없어요. 스크립트의 데이터를 채워보세요.</div>`;
+      return;
+    }
+    grid.innerHTML = list.map((item, i) => `
+      <a class="card ${extraClass}" href="${item.url}" target="_blank" rel="noopener">
+        <span class="tag-num">${numLabel} ${pad(i+1)}</span>
+        ${item.genre ? `<span class="genre">${item.genre}</span>` : ""}
+        <h3>${item.title}</h3>
+        <p>${item.desc}</p>
+        <span class="go">바로가기</span>
+      </a>
+    `).join("");
+  }
+
+  renderCards(webPages, "webGrid", "", "실험");
+  renderCards(creativeWorks, "creativeGrid", "creative", "작품");
+
+  const videoList = document.getElementById("videoList");
+  if(videos.length){
+    videoList.innerHTML = videos.map(v => `
+      <li><a href="${v.url}" target="_blank" rel="noopener"><span>${v.title}</span><span>▶</span></a></li>
+    `).join("");
+  }
+
+  /* ---------- 햄버거 드로어 동작 ---------- */
+  const menuBtn = document.getElementById("menuBtn");
+  const drawer = document.getElementById("drawer");
+  const overlay = document.getElementById("overlay");
+  const drawerClose = document.getElementById("drawerClose");
+
+  function openDrawer(){
+    drawer.classList.add("open");
+    overlay.classList.add("open");
+    menuBtn.setAttribute("aria-expanded", "true");
+    drawer.setAttribute("aria-hidden", "false");
+  }
+  function closeDrawer(){
+    drawer.classList.remove("open");
+    overlay.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded", "false");
+    drawer.setAttribute("aria-hidden", "true");
+  }
+
+  menuBtn.addEventListener("click", () => {
+    drawer.classList.contains("open") ? closeDrawer() : openDrawer();
+  });
+  drawerClose.addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") closeDrawer();
+  });
+  drawer.querySelectorAll("nav a").forEach(a => {
+    a.addEventListener("click", closeDrawer);
+  });
+</script>
+</body>
+</html>
