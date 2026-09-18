@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>과학게임: 양양이의 변신 모험</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', sans-serif;
+    }
+    body {
+      background-color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .game-console {
+      background: #dfdfdf;
+      padding: 20px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 480px;
+    }
+    .status-panel {
+      width: 100%;
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 14px;
+      border: 2px solid #ccc;
+    }
+    .gauge {
+      color: #2e7d32;
+    }
+    canvas {
+      background: #87CEEB;
+      border: 4px solid #333;
+      border-radius: 12px;
+      display: block;
+    }
+    /* 조정판 스타일 */
+    .controller {
+      width: 100%;
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+    }
+    .d-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 45px);
+      grid-template-rows: repeat(3, 45px);
+      gap: 3px;
+    }
+    .d-btn {
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .d-btn:active {
+      background: #222;
+    }
+    .up    { grid-column: 2; grid-row: 1; }
+    .left  { grid-column: 1; grid-row: 2; }
+    .right { grid-column: 3; grid-row: 2; }
+    .down  { grid-column: 2; grid-row: 3; }
+
+    .action-pad {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-potion {
+      background: #ff5722;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px #b03a16;
+    }
+    .btn-potion:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px #b03a16;
+    }
+    .btn-potion:disabled {
+      background: #aaa;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .info-text {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-console">
+  <!-- 상태창 -->
+  <div class="status-panel">
+    <div>캐릭터: <span id="formText">양 (기본)</span></div>
+    <div>남은 물약: <span id="potionText" class="gauge">100g</span></div>
+  </div>
+
+  <!-- 게임 화면 -->
+  <canvas id="gameCanvas" width="440" height="260"></canvas>
+
+  <!-- 조종판 -->
+  <div class="controller">
+    <!-- 방향키 D-Pad -->
+    <div class="d-pad">
+      <button class="d-btn up" onmousedown="move('up')" onmouseup="stopMove()">▲</button>
+      <button class="d-btn left" onmousedown="move('left')" onmouseup="stopMove()">◀</button>
+      <button class="d-btn right" onmousedown="move('right')" onmouseup="stopMove()">▶</button>
+      <button class="d-btn down" onmousedown="move('down')" onmouseup="stopMove()">▼</button>
+    </div>
+
+    <!-- 변신 액션 버튼 -->
+    <div class="action-pad">
+      <button id="potionBtn" class="btn-potion" onclick="drinkPotion()">물약 마시기<br><small>(-25g 변신)</small></button>
+    </div>
+  </div>
+  <div class="info-text">키보드 방향키 이동 / Space bar 변신 가능</div>
+</div>
+
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // 양양이 상태
+  const player = {
+    x: 50,
+    y: 190,
+    width: 32,
+    height: 32,
+    speed: 3,
+    power: 10,
+    isHuman: false,
+    potionLeft: 100, // 하루 100g 제한
+    humanTimer: 0
+  };
+
+  // 장애물 (과학 실험용 거대 바위: 인간 모드일 때만 밀 수 있음)
+  const obstacle = {
+    x: 280,
+    y: 180,
+    width: 50,
+    height: 50,
+    isBroken: false
+  };
+
+  const keys = {};
+
+  // 키보드 이벤트
+  window.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+    if (e.code === "Space") drinkPotion();
+  });
+  window.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+  });
+
+  // 버튼 조작 제어
+  let touchMove = null;
+  function move(dir) {
+    touchMove = dir;
+  }
+  function stopMove() {
+    touchMove = null;
+  }
+
+  // 물약 마시고 사람으로 변신
+  function drinkPotion() {
+    if (player.potionLeft >= 25 && !player.isHuman) {
+      player.potionLeft -= 25;
+      player.isHuman = true;
+      player.humanTimer = 300; // 약 5초 지속 (60fps 기준)
+      player.speed = 5;
+      player.power = 50;
+      updateUI();
+    } else if (player.potionLeft < 25) {
+      alert("오늘 마실 수 있는 물약(100g)을 모두 소진했습니다!");
+    }
+  }
+
+  function updateUI() {
+    document.getElementById("potionText").innerText = `${player.potionLeft}g`;
+    document.getElementById("formText").innerText = player.isHuman ? "슈퍼 인간 (파워 UP!)" : "양 (기본)";
+    document.getElementById("formText").style.color = player.isHuman ? "#e65100" : "#333";
+    
+    const potionBtn = document.getElementById("potionBtn");
+    if (player.potionLeft < 25) {
+      potionBtn.disabled = true;
+      potionBtn.innerText = "물약 소진 (0g)";
+    }
+  }
+
+  // 충돌 감지
+  function checkCollision(r1, r2) {
+    return !(r2.x > r1.x + r1.width || 
+             r2.x + r2.width < r1.x || 
+             r2.y > r1.y + r1.height ||
+             r2.y + r2.height < r1.y);
+  }
+
+  // 게임 업데이트 루프
+  function update() {
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["ArrowRight"] || touchMove === 'right') dx += player.speed;
+    if (keys["ArrowLeft"] || touchMove === 'left') dx -= player.speed;
+    if (keys["ArrowUp"] || touchMove === 'up') dy -= player.speed;
+    if (keys["ArrowDown"] || touchMove === 'down') dy += player.speed;
+
+    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x + dx));
+    player.y = Math.max(0, Math.min(canvas.height - player.height, player.y + dy));
+
+    // 바위와 상호작용
+    if (!obstacle.isBroken && checkCollision(player, obstacle)) {
+      if (player.isHuman) {
+        // 인간 상태면 강력한 힘으로 바위를 밀어냄
+        obstacle.x += 4;
+        if (obstacle.x > canvas.width) {
+          obstacle.isBroken = true;
+        }
+      } else {
+        // 양 상태면 밀지 못하고 막힘
+        player.x -= dx;
+        player.y -= dy;
+      }
+    }
+
+    // 변신 지속시간 처리
+    if (player.isHuman) {
+      player.humanTimer--;
+      if (player.humanTimer <= 0) {
+        player.isHuman = false;
+        player.speed = 3;
+        player.power = 10;
+        updateUI();
+      }
+    }
+  }
+
+  // 렌더링
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 바닥 잔디
+    ctx.fillStyle = "#8bc34a";
+    ctx.fillRect(0, 220, canvas.width, 40);
+
+    // 연구소 바위 장애물
+    if (!obstacle.isBroken) {
+      ctx.fillStyle = "#757575";
+      ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+      ctx.fillStyle = "#fff";
+      ctx.font = "11px sans-serif";
+      ctx.fillText("무거운 바위", obstacle.x - 2, obstacle.y - 8);
+    }
+
+    // 양양이 그리기
+    if (!player.isHuman) {
+      // 1. 기본 상태: 귀여운 양
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(player.x + 16, player.y + 16, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#333";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("양양이", player.x, player.y - 5);
+      // 눈
+      ctx.fillRect(player.x + 22, player.y + 12, 3, 3);
+    } else {
+      // 2. 변신 상태: 슈퍼 인간 (오라 연출)
+      ctx.fillStyle = "rgba(255, 152, 0, 0.4)";
+      ctx.beginPath();
+      ctx.arc(player.x + 16, player.y + 16, 22, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#d32f2f";
+      ctx.fillRect(player.x + 8, player.y, 16, 32);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillText("인간!", player.x + 4, player.y - 5);
+    }
+
+    requestAnimationFrame(() => {
+      update();
+      draw();
+    });
+  }
+
+  // 시작
+  updateUI();
+  draw();
+</script>
+
+</body>
+</html>
