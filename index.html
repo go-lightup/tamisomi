@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seonwoo's Laboratory</title>
+<title>Seonwoo's Laboratory - 선우의 연구소</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&display=swap" rel="stylesheet">
@@ -40,10 +40,8 @@
     color:var(--ink);
     font-family:'Gowun Dodum', sans-serif;
     line-height:1.7;
+    background-color:var(--paper);
   }
-  /* 그리드 라인은 아주 은은하게 */
-  body{ background-color:var(--paper); }
-  body::before{ content:none; }
 
   h1,h2,h3,.wordmark{ font-family:'Do Hyeon', sans-serif; letter-spacing:.5px; }
 
@@ -138,12 +136,21 @@
 
   /* ---------- 히어로 ---------- */
   .hero{
-    padding:64px 0 56px;
+    padding:40px 0 56px;
     position:relative;
     overflow:hidden;
     border-bottom:2px solid var(--ink);
   }
   .hero .wrap{ position:relative; z-index:1; }
+  .hero-banner-img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
   .hero .eyebrow-tag{
     display:inline-block;
     background:var(--marker);
@@ -164,10 +171,16 @@
     max-width:52ch;
     font-size:1.1rem;
     color:var(--ink-soft);
-    margin:0 0 28px;
+    margin:0 0 14px;
   }
-  .hero-doodle{
-    position:absolute; right:-40px; top:20px; width:280px; opacity:.9;
+  .account-info {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+    display: inline-block;
   }
   .scroll-hint{
     display:inline-flex; align-items:center; gap:8px;
@@ -312,7 +325,6 @@
   @media (max-width:640px){
     #about .about-grid{ grid-template-columns:1fr; }
     .badge{ width:130px; height:130px; font-size:2.2rem; }
-    .hero-doodle{ display:none; }
     section{ padding:48px 0; }
   }
 </style>
@@ -363,20 +375,23 @@
   <main id="top">
     <section class="hero">
       <div class="wrap">
-        <span class="eyebrow-tag">계속 업데이트 중인 실험실</span>
+        <!-- 맨 위에 추가된 일러스트 이미지 (원하시는 이미지 파일명으로 경로를 바꿔주세요) -->
+        <img src="seonwoo-hero.png" alt="선우와 아빠의 코딩 연구소 일러스트" class="hero-banner-img">
+
+        <span class="eyebrow-tag">과학실 &middot; 선우의 연구소</span>
         <h1>Seonwoo's Laboratory</h1>
-        <p>코드를 조합하고, 이야기를 그리고, 영상을 만드는&nbsp;
-           선우의 작업실입니다. 파이썬과 HTML로 만든 웹페이지부터
-           직접 쓴 만화와 소설, 유튜브 영상까지 이곳에 모아둡니다.</p>
+        
+        <!-- 자기계정 및 이메일 정보 추가 -->
+        <div class="account-info">
+          📧 <strong>GitHub 계정 이메일:</strong> seonwoo@example.com
+        </div>
+
+        <p>안녕하세요. 8살 선우에요. 제가 이 사이트를 시작한 이유는 아빠랑 코딩을 하고 싶어서 입니다.</p>
+        <p>이 글은 본 사이트에 github에서 서버에 올리게 해줬어요. 이 공간을 소중하게 아껴주게 행복 머니를 만들 예정입니다.</p>
+        <p>제가 CCTV에 관심이 많고 과속 단속 카메라에게도 관심이 많아요. 제가 관심사가 독특하죠? 헤헤 이 페이지 고유해주세요.</p>
+        
         <span class="scroll-hint">오른쪽 위 메뉴를 눌러 둘러보세요 ↗</span>
       </div>
-      <svg class="hero-doodle" viewBox="0 0 200 200" fill="none" stroke="#1B2A3C" stroke-width="2" stroke-linecap="round">
-        <path d="M80 20h30M85 20v30l-25 55a12 12 0 0 0 11 17h48a12 12 0 0 0 11-17l-25-55V20"/>
-        <path d="M70 95h50"/>
-        <circle cx="150" cy="40" r="3" fill="#1B2A3C"/>
-        <path d="M140 60c10 5 20 5 30 15" />
-        <path d="M20 150c15-10 25-10 35 0s20 10 35 0"/>
-      </svg>
     </section>
 
     <section id="about">
@@ -389,17 +404,16 @@
           <div class="badge">선우</div>
           <div>
             <p>
-              안녕하세요, 저는 <strong>선우</strong>입니다.
-              바이브 코딩으로 웹페이지 만드는 걸 좋아하고,
-              파이썬과 HTML로 이것저것 만들어보는 중이에요.
-              여기 자기소개 문장을 선우가 직접 채워보세요.
+              안녕하세요, 저는 8살 <strong>선우</strong>입니다!
+              아빠랑 같이 코딩하는 게 너무 재미있어서 이 웹페이지를 만들게 되었어요.
+              CCTV랑 과속 단속 카메라처럼 신기한 기계들을 아주 좋아한답니다. 앞으로 행복머니도 만들고 멋진 기능들을 계속 추가해 나갈게요!
             </p>
             <div class="tags">
               <span>Python</span>
               <span>HTML / CSS</span>
               <span>웹 개발</span>
-              <span>만화 · 소설</span>
-              <span>유튜브</span>
+              <span>CCTV & 과속단속카메라</span>
+              <span>행복머니</span>
             </div>
           </div>
         </div>
@@ -448,32 +462,24 @@
   </main>
 
   <footer>
-    <div class="wrap">© 2026 Seonwoo's Laboratory</div>
+    <div class="wrap">&copy; 2026 Seonwoo's Laboratory. All rights reserved.</div>
   </footer>
 
 <script>
-  /* ============================================================
-     아래 데이터만 수정하면 카드가 자동으로 만들어져요.
-     title / desc / url 을 선우가 만든 실제 내용으로 바꿔주세요.
-     ============================================================ */
-
   // 선우가 개발한 웹페이지 목록
   const webPages = [
     { title: "나만의 계산기", desc: "HTML로 만든 간단한 계산기 웹페이지 입니다. 여러분 잘 보세요!", url: "vibecoding/calculator.html" },
-    { title: "미니 게임", desc: "좀비게임입니다..", url: "vibecoding/zombie_game.html" },
-    { title: "0000", desc: "자바스크립트로 만든 작은 게임이에요.", url: "https://example.com" },
+    { title: "좀비 게임", desc: "선우가 만든 좀비 게임이에요.", url: "vibecoding/zombie_game.html" },
+    { title: "행복머니 프로젝트", desc: "이 공간을 소중하게 아껴주기 위해 만드는 행복머니 시스템!", url: "#" },
   ];
 
   // 선우가 창작한 만화·소설 목록
   const creativeWorks = [
-    { title: "예: 나의 첫 만화", genre: "만화 · 4컷", desc: "짧은 이야기를 담은 4컷 만화예요.", url: "https://example.com" },
-    { title: "예: 짧은 소설", genre: "소설 · 단편", desc: "직접 쓴 단편 소설이에요.", url: "https://example.com" },
+    { title: "CCTV 탐정 선우", genre: "만화 · 4컷", desc: "동네 CCTV는 다 내 손 안에 있어!", url: "#" },
+    { title: "과속 단속 카메라의 비밀", genre: "소설 · 단편", desc: "카메라가 과속 차량을 잡는 신기한 이야기", url: "#" },
   ];
 
-  // 유튜브 대표 영상 목록 (비워두면 자동으로 안내 문구만 표시돼요)
-  const videos = [
-    // { title: "예: 첫 영상", url: "https://www.youtube.com/watch?v=xxxxx" },
-  ];
+  const videos = [];
 
   function pad(n){ return String(n).padStart(2, "0"); }
 
@@ -497,14 +503,6 @@
   renderCards(webPages, "webGrid", "", "실험");
   renderCards(creativeWorks, "creativeGrid", "creative", "작품");
 
-  const videoList = document.getElementById("videoList");
-  if(videos.length){
-    videoList.innerHTML = videos.map(v => `
-      <li><a href="${v.url}" target="_blank" rel="noopener"><span>${v.title}</span><span>▶</span></a></li>
-    `).join("");
-  }
-
-  /* ---------- 햄버거 드로어 동작 ---------- */
   const menuBtn = document.getElementById("menuBtn");
   const drawer = document.getElementById("drawer");
   const overlay = document.getElementById("overlay");
