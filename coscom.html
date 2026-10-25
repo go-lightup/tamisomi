@@ -1,0 +1,300 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>코스컴 로봇개 예약</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 한 열 예약 보드. 위에서부터 요일 → 시간 → 관람 시간(요금) → 예약하기 */
+:root {
+  --bg: #EDF0F2;
+  --surface: #FFFFFF;
+  --ink: #121C26;
+  --muted: #5B6A78;
+  --line: #CDD5DC;
+  --accent: #2457F5;
+  --accent-ink: #FFFFFF;
+  --soft: #DCE5FF;
+  --ok: #12805C;
+  --full: #B3261E;
+  --font-display: "Do Hyeon", "Noto Sans KR", sans-serif;
+  --font-body: "Noto Sans KR", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E141B; --surface: #16202A; --ink: #E8EEF3; --muted: #94A3B2; --line: #2A3947;
+    --accent: #6C8CFF; --accent-ink: #0E141B; --soft: #1E2B4D; --ok: #3DD598; --full: #FF7B72;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E141B; --surface: #16202A; --ink: #E8EEF3; --muted: #94A3B2; --line: #2A3947;
+  --accent: #6C8CFF; --accent-ink: #0E141B; --soft: #1E2B4D; --ok: #3DD598; --full: #FF7B72;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+header { display: flex; align-items: center; gap: 16px; }
+header svg { flex: none; width: 96px; height: auto; color: var(--accent); }
+.brand { font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: 34px; line-height: 1.15; margin: 2px 0 4px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 20px; margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+h2 small { font-family: var(--font-body); font-size: 13px; color: var(--muted); }
+
+.days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.day { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+.day b { font-family: var(--font-display); font-weight: 400; font-size: 22px; }
+.day span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.day[aria-pressed="true"] span { color: inherit; opacity: .85; }
+
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.slot { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.slot .t { font-family: var(--font-display); font-size: 22px; line-height: 1; }
+.slot .meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.seats { display: flex; gap: 4px; }
+.seats i { width: 14px; height: 14px; border-radius: 3px; border: 2px solid var(--ok); }
+.seats i.taken { background: var(--full); border-color: var(--full); }
+.seats i.mine { background: var(--accent); border-color: var(--accent); }
+.slot[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); box-shadow: 0 0 0 2px var(--accent) inset; }
+.slot:disabled { cursor: not-allowed; background: var(--bg); }
+.slot:disabled .t { color: var(--muted); text-decoration: line-through; }
+.slot .full { color: var(--full); font-weight: 700; }
+.slot .back { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+.prices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.price { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.price b { font-family: var(--font-display); font-weight: 400; font-size: 22px; }
+.price span { font-family: var(--font-mono); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.price[aria-pressed="true"] { background: var(--soft); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+
+.summary { display: flex; flex-direction: column; gap: 12px; }
+.sumline { font-family: var(--font-mono); font-size: 14px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.sumline strong { color: var(--ink); }
+.book { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 14px; font-family: var(--font-display); font-size: 22px; }
+.book:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+
+.mine-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mine-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+.mine-list li span { min-width: 0; font-variant-numeric: tabular-nums; }
+.cancel { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 10px; font-size: 13px; flex: none; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .toast { animation: pop .2s ease-out; } @keyframes pop { from { opacity: 0; transform: translate(-50%, 8px); } } }
+</style>
+
+<div class="wrap">
+  <header>
+    <svg viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="26" y="22" width="56" height="22" rx="5"/>
+      <rect x="80" y="12" width="24" height="20" rx="5"/>
+      <path d="M104 18h8"/>
+      <circle cx="94" cy="21" r="2.5" fill="currentColor"/>
+      <path d="M34 44v16l-6 12M48 44v16l6 12M66 44v16l-6 12M76 44v16l6 12"/>
+      <path d="M26 28l-12-8"/>
+    </svg>
+    <div>
+      <div class="brand">COSCOM</div>
+      <h1>코스컴 로봇개 관람</h1>
+      <p class="sub">원하는 요일과 시간을 고르고 예약하기를 누르세요.</p>
+    </div>
+  </header>
+
+  <section>
+    <h2>요일 <small id="dayNote"></small></h2>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section>
+    <h2>시간 <small>타임당 2좌석</small></h2>
+    <div class="slots" id="slots"></div>
+    <p class="hint" id="slotHint">두 좌석이 모두 예약된 시간은 마감돼요. 예약한 지 2시간이 지나면 그 자리가 다시 열리니, 그동안은 다른 시간을 골라 주세요.</p>
+  </section>
+
+  <section>
+    <h2>관람 시간과 요금</h2>
+    <div class="prices" id="prices"></div>
+  </section>
+
+  <section class="summary">
+    <div class="sumline" id="sumline"></div>
+    <button class="book" id="book" disabled>예약하기</button>
+  </section>
+
+  <section id="mineBox" hidden>
+    <h2>내 예약</h2>
+    <ul class="mine-list" id="mine"></ul>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var SEATS = 2;
+  var DAYS = [
+    { key: "2026-10-26", name: "월", date: "10/26", hours: [18, 19, 20] },
+    { key: "2026-10-27", name: "화", date: "10/27", hours: [19, 20] },
+    { key: "2026-10-28", name: "수", date: "10/28", hours: [17, 18, 19, 20] },
+    { key: "2026-10-29", name: "목", date: "10/29", hours: [18, 19] }
+  ];
+  var PRICES = [{ min: 1, won: 100 }, { min: 3, won: 500 }, { min: 6, won: 1000 }];
+  /* 예약한 자리는 예약 시각부터 2시간 동안만 잡혀 있고, 지나면 다시 예약할 수 있다 */
+  var HOLD = 2 * 60 * 60 * 1000;
+  var STORE = "coscom-mine-v2";
+  var STORE_O = "coscom-others-v2";
+  var MIN = 60 * 1000;
+
+  /* 다른 손님이 이미 잡은 좌석 (예시, 몇 분 전에 예약한 것으로 시작) */
+  function seedOthers() {
+    var now = Date.now();
+    return [
+      { day: "2026-10-26", hour: 19, at: now - 20 * MIN },
+      { day: "2026-10-28", hour: 18, at: now - 75 * MIN },
+      { day: "2026-10-28", hour: 18, at: now - 30 * MIN },
+      { day: "2026-10-29", hour: 19, at: now - 10 * MIN }
+    ];
+  }
+
+  var mine = load(STORE, []);
+  var others = load(STORE_O, null) || seedOthers();
+  var state = { day: 0, hour: null, dur: 3 };
+
+  function load(k, fallback) {
+    try {
+      var v = JSON.parse(localStorage.getItem(k));
+      return Array.isArray(v) ? v : fallback;
+    } catch (e) { return fallback; }
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(mine));
+      localStorage.setItem(STORE_O, JSON.stringify(others));
+    } catch (e) {}
+  }
+  function $(id) { return document.getElementById(id); }
+  function label(h) { return "오후 " + (h > 12 ? h - 12 : h) + "시"; }
+  function won(n) { return n.toLocaleString("ko-KR") + "원"; }
+  function active(e) { return Date.now() - e.at < HOLD; }
+  function prune() {
+    var a = mine.length, b = others.length;
+    mine = mine.filter(active); others = others.filter(active);
+    if (a !== mine.length || b !== others.length) save();
+  }
+  function inSlot(list, key, h) { return list.filter(function (e) { return e.day === key && e.hour === h; }); }
+  function mineAt(key, h) { return inSlot(mine, key, h).length; }
+  function taken(key, h) { return Math.min(SEATS, inSlot(others, key, h).length + mineAt(key, h)); }
+  function price(min) { return PRICES.filter(function (p) { return p.min === min; })[0].won; }
+  function fmt(ms) {
+    var m = Math.max(1, Math.ceil(ms / MIN)), hh = Math.floor(m / 60), mm = m % 60;
+    return hh ? hh + "시간" + (mm ? " " + mm + "분" : "") : mm + "분";
+  }
+  function reopen(key, h) {
+    var all = inSlot(others, key, h).concat(inSlot(mine, key, h));
+    var first = Math.min.apply(null, all.map(function (e) { return e.at + HOLD; }));
+    return fmt(first - Date.now());
+  }
+
+  function renderDays() {
+    var box = $("days"); box.innerHTML = "";
+    DAYS.forEach(function (d, i) {
+      var b = document.createElement("button");
+      b.className = "day"; b.setAttribute("aria-pressed", String(i === state.day));
+      b.innerHTML = "<b>" + d.name + "</b><span>" + d.date + "</span>";
+      b.addEventListener("click", function () { state.day = i; state.hour = null; render(); });
+      box.appendChild(b);
+    });
+    var d = DAYS[state.day];
+    $("dayNote").textContent = d.date + " (" + d.name + ") · " + d.hours.length + "개 타임";
+  }
+
+  function renderSlots() {
+    var d = DAYS[state.day], box = $("slots"); box.innerHTML = "";
+    d.hours.forEach(function (h) {
+      var t = taken(d.key, h), left = SEATS - t, m = mineAt(d.key, h);
+      var b = document.createElement("button");
+      b.className = "slot"; b.disabled = left <= 0;
+      b.setAttribute("aria-pressed", String(state.hour === h));
+      var seats = "";
+      for (var i = 0; i < SEATS; i++) {
+        var cls = i < m ? "mine" : (i < t ? "taken" : "");
+        seats += "<i class='" + cls + "'></i>";
+      }
+      b.innerHTML = "<span class='t'>" + label(h) + "</span><span class='meta'><span class='seats'>" + seats + "</span>" +
+        (left <= 0 ? "<span class='full'>마감</span>" : "<span>" + left + "석 남음</span>") + "</span>" +
+        (left <= 0 ? "<span class='back'>" + reopen(d.key, h) + " 뒤 다시 예약</span>" : "");
+      b.addEventListener("click", function () { state.hour = h; render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderPrices() {
+    var box = $("prices"); box.innerHTML = "";
+    PRICES.forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "price"; b.setAttribute("aria-pressed", String(state.dur === p.min));
+      b.innerHTML = "<b>" + p.min + "분</b><span>" + won(p.won) + "</span>";
+      b.addEventListener("click", function () { state.dur = p.min; render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderSummary() {
+    var d = DAYS[state.day], line = $("sumline");
+    if (state.hour === null) {
+      line.textContent = "시간을 선택하면 예약 내용이 여기에 표시돼요.";
+      $("book").disabled = true;
+    } else {
+      line.innerHTML = "<strong>" + d.date + "(" + d.name + ") " + label(state.hour) + "</strong> · " + state.dur + "분 · <strong>" + won(price(state.dur)) + "</strong>";
+      $("book").disabled = false;
+    }
+  }
+
+  function renderMine() {
+    var ul = $("mine"); ul.innerHTML = "";
+    $("mineBox").hidden = mine.length === 0;
+    mine.forEach(function (m, idx) {
+      var d = DAYS.filter(function (x) { return x.key === m.day; })[0];
+      var li = document.createElement("li");
+      li.innerHTML = "<span>" + d.date + "(" + d.name + ") " + label(m.hour) + " · " + m.dur + "분 · " + won(price(m.dur)) + " · " + fmt(m.at + HOLD - Date.now()) + " 뒤 자리 반환</span>";
+      var c =document.createElement("button"); c.className = "cancel"; c.textContent = "예약 취소";
+      c.addEventListener("click", function () { mine.splice(idx, 1); save(); toast("예약을 취소했어요."); render(); });
+      li.appendChild(c); ul.appendChild(li);
+    });
+  }
+
+  var timer;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(timer); timer = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+
+  $("book").addEventListener("click", function () {
+    var d = DAYS[state.day];
+    if (state.hour === null) return;
+    if (taken(d.key, state.hour) >= SEATS) { toast("방금 마감됐어요. 다른 시간을 골라 주세요."); state.hour = null; render(); return; }
+    if (mineAt(d.key, state.hour) > 0) { toast("이미 예약한 시간이에요."); return; }
+    mine.push({ day: d.key, hour: state.hour, dur: state.dur, at: Date.now() });
+    save();
+    toast(d.date + "(" + d.name + ") " + label(state.hour) + " " + state.dur + "분 예약 완료");
+    state.hour = null; render();
+  });
+
+  function render() { prune(); renderDays(); renderSlots(); renderPrices(); renderSummary(); renderMine(); }
+  render();
+  setInterval(render, 30000);
+})();
+</script>
+
+</body></html>
