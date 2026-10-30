@@ -1,0 +1,438 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>seooon mony</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: centered wordmark on top; left menu of 9 (chips on phones); right side shows the point wallet and its seven sections. */
+:root {
+  --bg: #F2F5F3;
+  --surface: #FFFFFF;
+  --fg: #13201A;
+  --muted: #5A6861;
+  --line: #DCE4DF;
+  --accent: #0B8F5B;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E1F3EA;
+  --gold: #F2B544;
+  --ok: #0B7A4E;
+  --warn: #B3452B;
+  --shadow: 0 1px 2px rgba(19, 32, 26, 0.06), 0 6px 22px rgba(19, 32, 26, 0.06);
+  --font-display: 'Outfit', 'IBM Plex Sans KR', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1613; --surface: #17211C; --fg: #E6EFEA; --muted: #9BAAA2; --line: #26342D;
+    --accent: #4FD6A0; --accent-ink: #07150F; --accent-soft: #1B2D25; --gold: #F5C45E;
+    --ok: #5FD3A0; --warn: #FF9A7E;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1613; --surface: #17211C; --fg: #E6EFEA; --muted: #9BAAA2; --line: #26342D;
+  --accent: #4FD6A0; --accent-ink: #07150F; --accent-soft: #1B2D25; --gold: #F5C45E;
+  --ok: #5FD3A0; --warn: #FF9A7E;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 72px;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.shell { max-width: 1040px; margin: 0 auto; }
+
+.brand { margin: 0 0 22px; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 6vw, 2.3rem); letter-spacing: 0.02em; color: var(--accent); line-height: 1.2; }
+
+.app { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 32px; align-items: start; }
+
+/* menu */
+.nav { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; text-decoration: none; font-weight: 500; }
+.nav a:hover { background: var(--bg); }
+.nav a[aria-current="page"] { background: var(--accent-soft); }
+.gl { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-size: 0.85rem; font-weight: 600; font-family: var(--font-display); }
+.nav hr { border: 0; border-top: 1px solid var(--line); margin: 8px 6px; }
+
+/* content */
+.main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.head h2 { margin: 0; font-size: 1.5rem; line-height: 1.25; }
+.back { display: inline-block; margin-bottom: 6px; color: var(--muted); font-size: 0.9rem; text-decoration: none; }
+.back:hover { color: var(--accent); }
+.bal { font-variant-numeric: tabular-nums; font-size: 0.95rem; color: var(--muted); }
+.bal b { color: var(--fg); font-weight: 600; }
+.lead { color: var(--muted); margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+.balance { background: var(--accent); color: var(--accent-ink); border-radius: 20px; padding: 22px 24px; display: flex; flex-direction: column; gap: 4px; }
+.balance small { opacity: 0.85; font-size: 0.9rem; }
+.balance strong { font-family: var(--font-display); font-size: clamp(2.2rem, 8vw, 3rem); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.panel h3 { margin: 0; font-size: 1.05rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 0.88rem; padding: 4px 12px; border-radius: 999px; background: var(--accent-soft); font-variant-numeric: tabular-nums; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; min-width: 0; }
+.card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.card strong { font-weight: 600; }
+.card span { color: var(--muted); font-size: 0.88rem; }
+
+.tile-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+.tile-row > .tile { flex: 1 1 260px; }
+.tile {
+  appearance: none; width: 100%; min-width: 0; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 18px 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+}
+.tile:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.tile strong { display: block; font-size: 1.08rem; font-weight: 600; line-height: 1.35; }
+.tile small { display: block; color: var(--muted); font-size: 0.88rem; margin-top: 2px; }
+.tile.done { cursor: default; background: var(--accent-soft); border-color: transparent; }
+.tile.done:hover { box-shadow: none; }
+.amt { flex: none; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.95rem; padding: 4px 12px; border-radius: 999px; border: 1px solid currentColor; }
+.amt.plus { color: var(--ok); }
+.amt.minus { color: var(--warn); }
+.rain { width: 56px; height: 56px; flex: none; color: var(--muted); }
+.btn {
+  appearance: none; min-height: 44px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 500;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.wide { width: 100%; }
+.offer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.offer strong { font-size: 1.1rem; }
+.pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.pick .tile[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.price s { color: var(--muted); }
+.price strong { font-size: 1.5rem; font-family: var(--font-display); }
+.banner { padding: 16px 20px; border-radius: 16px; background: linear-gradient(100deg, var(--gold), var(--accent-soft)); font-weight: 600; font-size: 1.1rem; color: #1B1608; }
+:root[data-theme="dark"] .banner { color: #1B1608; }
+
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.log li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.log li:last-child { border-bottom: 0; }
+.log small { display: block; color: var(--muted); }
+.log .d { font-weight: 600; white-space: nowrap; }
+.log .d.p { color: var(--ok); }
+.log .d.m { color: var(--warn); }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; max-width: calc(100vw - 32px);
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 12px; box-shadow: var(--shadow); font-size: 0.95rem;
+}
+.toast.warn { background: var(--warn); color: #fff; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .nav { flex-direction: row; overflow-x: auto; gap: 6px; padding: 8px; border-radius: 16px; }
+  .nav a { flex: none; white-space: nowrap; padding: 8px 14px 8px 10px; }
+  .nav hr { display: none; }
+}
+</style>
+
+<div class="shell">
+  <h1 class="brand">seooon mony</h1>
+  <div class="app">
+    <nav class="nav" id="nav" aria-label="메뉴"></nav>
+    <main class="main" id="main" aria-live="polite"></main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var KEY = 'seooon.v1';
+  var GRANT = 1300;
+  var fmt = function (n) { return Number(n).toLocaleString('ko-KR'); };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var monthKey = function (d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1); };
+  var monthIndex = function (k) { var p = k.split('-').map(Number); return p[0] * 12 + p[1] - 1; };
+  var today = function () { var d = new Date(); return monthKey(d) + '-' + pad(d.getDate()); };
+
+  /* ---------- 데이터 ---------- */
+  function fresh() { return { points: GRANT, grant: monthKey(new Date()), log: [], claims: {}, flags: {}, perks: [], saved: 0 }; }
+  function norm(o) {
+    var s = Object.assign(fresh(), o || {});
+    if (!Array.isArray(s.log)) s.log = [];
+    if (!Array.isArray(s.perks)) s.perks = [];
+    if (!s.claims || typeof s.claims !== 'object') s.claims = {};
+    if (!s.flags || typeof s.flags !== 'object') s.flags = {};
+    return s;
+  }
+  var S = fresh();
+
+  function addLog(label, d) { S.log.unshift({ t: Date.now(), label: label, d: d }); if (S.log.length > 100) S.log.length = 100; }
+  function topUp() {
+    var now = monthKey(new Date());
+    var n = monthIndex(now) - monthIndex(S.grant);
+    if (n > 0) { S.points += n * GRANT; S.grant = now; addLog('매달 지급', n * GRANT); return true; }
+    return false;
+  }
+
+  /* 저장: 이 브라우저 + (가능하면) 내 비공개 저장소 */
+  var docRef = null, writing = false, dirty = false;
+  function writeLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function save() { S.saved = Date.now(); writeLocal(); flush(); }
+  async function flush() {
+    if (!docRef) return;
+    if (writing) { dirty = true; return; }
+    writing = true;
+    try { do { dirty = false; await docRef.set({ money: S }); } while (dirty); } catch (e) {}
+    writing = false;
+  }
+  function loadLocal() {
+    try { var r = localStorage.getItem(KEY); if (r) { var o = JSON.parse(r); if (o && typeof o === 'object') return norm(o); } } catch (e) {}
+    return null;
+  }
+
+  function earn(label, n) { S.points += n; addLog(label, n); save(); }
+  function spend(label, n) {
+    if (S.points < n) { toast('포인트가 부족해요. ' + fmt(n) + ' P가 필요하고 지금은 ' + fmt(S.points) + ' P예요.', 'warn'); return false; }
+    S.points -= n; addLog(label, -n); save(); return true;
+  }
+  function addPerk(name) {
+    var p = S.perks.filter(function (x) { return x.name === name; })[0];
+    if (p) p.n++; else S.perks.push({ name: name, n: 1 });
+    save();
+  }
+
+  var tt;
+  function toast(msg, kind) {
+    var el = $('#toast');
+    el.textContent = msg; el.className = 'toast' + (kind === 'warn' ? ' warn' : ''); el.hidden = false;
+    clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; }, 3200);
+  }
+
+  /* ---------- 메뉴 ---------- */
+  var NAV = [
+    { id: 'home', label: '포인트 홈', g: 'P' },
+    { id: 'history', label: '포인트내역', g: 'P' },
+    { id: 'convert', label: '포인트 전환', g: '⇄' },
+    { id: 'couponreg', label: '포인트쿠폰 등록', g: '+' },
+    { id: 'moneylog', label: '머니 내역', g: '₩' },
+    { id: 'moneycharge', label: '머니 충전', g: '+' },
+    { id: 'passbook', label: '머니 통장', g: '▤' },
+    { id: 'sendlog', label: '송금 내역', g: '↗' },
+    { id: 'coupons', label: '쿠폰', g: '%' }
+  ];
+  var SUB = { my: '나의 포인트', account: '계정 포인트', pro: 'pro 포인트', moneyday: '머니머니 데이', charge: '충전', prize: '이달의 상', card: '제휴 카드' };
+  var HINT = { my: '알람 받고 100 P', account: '23 P 적립 · Zero 카드', pro: '한도조회 · 제휴발급', moneyday: '머니 100% 할인', charge: '준비 중', prize: '준비 중', card: '준비 중' };
+  var cur = 'home', U = {};
+
+  function navHtml() {
+    var owner = SUB[cur] ? 'home' : cur;
+    return NAV.map(function (n, i) {
+      var sep = (i === 7 || i === 8) ? '<hr>' : '';
+      return sep + '<a href="#' + n.id + '"' + (n.id === owner ? ' aria-current="page"' : '') + '><span class="gl" aria-hidden="true">' + n.g + '</span>' + n.label + '</a>';
+    }).join('');
+  }
+
+  /* ---------- 화면 조각 ---------- */
+  function head(title, back) {
+    return '<div class="head"><div>' + (back ? '<a class="back" href="#home">← 포인트 홈</a>' : '') + '<h2>' + title + '</h2></div>' +
+      '<span class="bal">내 포인트 <b class="num">' + fmt(S.points) + ' P</b></span></div>';
+  }
+  function tile(act, title, sub, amt, kind) {
+    var a = amt ? '<span class="amt ' + (kind || 'plus') + '">' + amt + '</span>' : '';
+    return '<button class="tile" type="button" data-act="' + act + '"><span><strong>' + title + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + a + '</button>';
+  }
+  function doneTile(text) { return '<div class="tile done"><span><strong>' + text + '</strong></span><span aria-hidden="true">✓</span></div>'; }
+  var RAIN = '<svg class="rain" viewBox="0 0 64 64" aria-hidden="true"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".45"><path d="M8 4v8M30 2v9M56 6v8M44 50v8"/></g>' +
+    '<g fill="var(--gold)"><circle cx="14" cy="26" r="8"/><circle cx="38" cy="36" r="8"/><circle cx="52" cy="22" r="7"/><circle cx="22" cy="54" r="6"/></g>' +
+    '<g fill="#5A4300" font-size="9" font-family="sans-serif" text-anchor="middle"><text x="14" y="29">₩</text><text x="38" y="39">₩</text><text x="52" y="25">₩</text></g></svg>';
+
+  /* ---------- 화면 ---------- */
+  var VIEWS = {
+    home: function () {
+      var d = new Date(), next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      var perks = S.perks.length
+        ? '<div class="chips">' + S.perks.map(function (p) { return '<span class="chip">' + p.name + (p.n > 1 ? ' ×' + p.n : '') + '</span>'; }).join('') + '</div>'
+        : '<p class="lead">아직 받은 혜택이 없어요.</p>';
+      var cards = Object.keys(SUB).map(function (id) {
+        return '<a class="card" href="#' + id + '"><strong>' + SUB[id] + '</strong><span>' + HINT[id] + '</span></a>';
+      }).join('');
+      return head('포인트 홈', false) +
+        '<section class="balance"><small>내 포인트</small><strong>' + fmt(S.points) + ' P</strong><small>매달 ' + fmt(GRANT) + ' P가 들어와요 · 다음 지급 ' + (next.getMonth() + 1) + '월 1일</small></section>' +
+        '<section class="panel"><h3>내 혜택</h3>' + perks + '</section>' +
+        '<section class="cards" aria-label="포인트 메뉴">' + cards + '</section>';
+    },
+
+    my: function () {
+      var main;
+      if (S.claims.my === today()) main = doneTile('오늘 100 P를 받았어요');
+      else if (!U.my) main = tile('my1', '알람 받고 머니 가져가자!', '눌러서 시작해요');
+      else main = tile('my2', '100 point 만나세요!', '누르면 100 P가 들어와요', '+100 P');
+      return head(SUB.my, true) + '<div class="tile-row">' + main + '<button class="btn" type="button" data-act="more">더 알아보기</button></div>';
+    },
+
+    account: function () {
+      var a = S.claims.acc === today() ? doneTile('오늘 23 P를 적립했어요') : tile('acc23', '대상자 포인트 적립', '23 point', '+23 P');
+      var html = head(SUB.account, true) + a;
+      html += '<button class="tile" type="button" data-act="bank"><span><strong>최대의 은행이면 적립 이닥!</strong><small>눌러서 자세히 보기</small></span>' + RAIN + '</button>';
+      if (U.acct >= 1) {
+        html += '<section class="panel"><h3>Zero 포인트 할인 카드!</h3>' +
+          (U.acct >= 2 || S.flags.zero ? '' : '<button class="btn primary" type="button" data-act="reg">등록하기</button>') + '</section>';
+      }
+      if (U.acct >= 2 || S.flags.zero) {
+        html += S.flags.zero ? doneTile('Zero 포인트 할인 카드 등록 완료 · 0.2% 할인')
+          : tile('zero_pay', '문회 200 point! 지금 만나세요!', '0.2% 할인 · 누르면 200 P가 빠져나가요', '-200 P', 'minus');
+      }
+      return html;
+    },
+
+    pro: function () {
+      var html = head(SUB.pro, true);
+      html += tile('pro1', '한도조회 많이!', '눌러서 확인해요');
+      if (U.pro1) html += S.flags.p13 ? doneTile('제휴발급 1.3% 할인 받았어요') : tile('pro2', '제휴발급 1.3% 할인', '누르면 혜택이 담겨요', '1.3%');
+      html += '<button class="btn wide" type="button" data-act="all">모든 포인트 할인</button>';
+      if (U.all || S.flags.premium) {
+        html += '<section class="panel offer"><div><strong>12.7% 할인 결제하세요 400 point!</strong><div class="lead">결제하면 고급을 쓸 수 있어요</div></div>' +
+          (S.flags.premium ? '<span class="chip">결제 완료 ✓</span>' : '<button class="btn primary" type="button" data-act="pay400">결제하기 · 400 P</button>') + '</section>';
+      }
+      if (S.flags.premium) {
+        var two = S.perks.filter(function (p) { return p.name === '제휴 포인트 2% 할인'; })[0];
+        html += '<section class="panel"><h3>고급 사용 중</h3>' + tile('two', '제휴 포인트 2% 할인', '연달아 받을 수 있어요', two ? two.n + '회' : '2%') + '</section>';
+      }
+      return html;
+    },
+
+    moneyday: function () {
+      var html = head(SUB.moneyday, true);
+      html += tile('md1', '머니 100% 할인!', '눌러서 확인해요');
+      if (U.md1) html += S.flags.lotte ? doneTile('롯데카드 3% 할인 받았어요') : tile('lotte', '롯데카드 3% 할인', '누르면 10 P가 빠져나가요', '-10 P', 'minus');
+      html += tile('bene', '주요혜택', '지금 하시면 100 point 받아요!', '+100 P');
+      if (U.bene) {
+        var price = U.pick === 'new' ? 990 : U.pick === 'super' ? 104 : null;
+        html += '<section class="panel"><h3>카드를 고르세요.</h3><div class="price"><span class="lead">원래 금액</span>' +
+          (price ? '<s>1,000 P</s><strong>' + (U.pick === 'super' ? '약 ' : '') + fmt(price) + ' P</strong>' : '<strong>1,000 P</strong>') + '</div>' +
+          '<div class="pick">' +
+          '<button class="tile" type="button" data-act="pick_new" aria-pressed="' + (U.pick === 'new') + '"><span><strong>신상카드</strong><small>1% 할인</small></span></button>' +
+          '<button class="tile" type="button" data-act="pick_super" aria-pressed="' + (U.pick === 'super') + '"><span><strong>제휴머니 슈퍼카드</strong><small>20% 할인</small></span></button>' +
+          '</div><button class="btn primary" type="button" data-act="buy">결제하기</button></section>';
+      }
+      html += '<div class="banner">신상포인트 최대!!! 할인!</div>';
+      return html;
+    },
+
+    history: function () {
+      var items = S.log.length ? '<ul class="log">' + S.log.map(function (l) {
+        var d = new Date(l.t);
+        return '<li><span>' + l.label + '<small>' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + '</small></span>' +
+          '<span class="d ' + (l.d >= 0 ? 'p' : 'm') + '">' + (l.d >= 0 ? '+' : '-') + fmt(Math.abs(l.d)) + ' P</span></li>';
+      }).join('') + '</ul>' : '<p class="lead">아직 내역이 없어요.</p>';
+      return head('포인트내역', false) + '<section class="panel">' + items + '</section>';
+    },
+
+    stub: function () {
+      var title = SUB[cur] || (NAV.filter(function (n) { return n.id === cur; })[0] || {}).label || '';
+      return head(title, !!SUB[cur]) + '<section class="panel"><p class="lead">아직 내용이 없는 화면이에요.</p></section>';
+    }
+  };
+
+  /* ---------- 동작 ---------- */
+  function claim(key, n, label, done) {
+    if (S.claims[key] === today()) { toast('오늘은 이미 받았어요.'); return; }
+    S.claims[key] = today(); earn(label, n); toast(done, 'ok'); paint();
+  }
+  var ACT = {
+    more: function () { location.hash = '#home'; },
+    my1: function () { U.my = 1; paint(); },
+    my2: function () { claim('my', 100, '나의 포인트 · 알람 보상', '100 P가 들어왔어요.'); U.my = 0; paint(); },
+    acc23: function () { claim('acc', 23, '계정 포인트 · 대상자 적립', '23 P가 들어왔어요.'); },
+    bank: function () { U.acct = Math.max(U.acct || 0, 1); paint(); },
+    reg: function () { U.acct = 2; paint(); },
+    zero_pay: function () {
+      if (S.flags.zero) return;
+      if (!spend('Zero 포인트 할인 카드 등록', 200)) return;
+      S.flags.zero = true; addPerk('Zero 카드 0.2% 할인'); toast('등록했어요. 200 P가 빠져나갔어요.', 'ok'); paint();
+    },
+    pro1: function () { U.pro1 = 1; paint(); },
+    pro2: function () { if (S.flags.p13) return; S.flags.p13 = true; addPerk('제휴발급 1.3% 할인'); toast('1.3% 할인이 담겼어요.', 'ok'); paint(); },
+    all: function () { U.all = 1; paint(); },
+    pay400: function () {
+      if (S.flags.premium) return;
+      if (!spend('pro 포인트 · 12.7% 할인 결제', 400)) return;
+      S.flags.premium = true; addPerk('모든 포인트 12.7% 할인'); toast('결제했어요. 고급을 쓸 수 있어요.', 'ok'); paint();
+    },
+    two: function () { if (!S.flags.premium) return; addPerk('제휴 포인트 2% 할인'); toast('2% 할인이 담겼어요.', 'ok'); paint(); },
+    md1: function () { U.md1 = 1; paint(); },
+    lotte: function () {
+      if (S.flags.lotte) return;
+      if (!spend('머니머니 데이 · 롯데카드 3% 할인', 10)) return;
+      S.flags.lotte = true; addPerk('롯데카드 3% 할인'); toast('3% 할인이 담겼어요. 10 P가 빠져나갔어요.', 'ok'); paint();
+    },
+    bene: function () { U.bene = 1; paint(); },
+    pick_new: function () { U.pick = 'new'; paint(); },
+    pick_super: function () { U.pick = 'super'; paint(); },
+    buy: function () {
+      if (!U.pick) { toast('카드를 먼저 골라 주세요.', 'warn'); return; }
+      var price = U.pick === 'new' ? 990 : 104;
+      if (!spend('머니머니 데이 · ' + (U.pick === 'new' ? '신상카드' : '제휴머니 슈퍼카드') + ' 결제', price)) return;
+      earn('주요혜택 보상', 100);
+      toast(fmt(price) + ' P를 결제하고 100 P를 받았어요.', 'ok'); U.pick = null; paint();
+    }
+  };
+  $('#main').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) return;
+    var f = ACT[b.getAttribute('data-act')];
+    if (f) f();
+  });
+
+  /* ---------- 라우팅 ---------- */
+  function paint() {
+    $('#nav').innerHTML = navHtml();
+    $('#main').innerHTML = (VIEWS[cur] || VIEWS.stub)();
+  }
+  function route() {
+    var h = location.hash.replace(/^#/, '');
+    var ok = SUB.hasOwnProperty(h) || NAV.some(function (n) { return n.id === h; });
+    cur = ok ? h : 'home'; U = {};
+    paint(); window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  /* ---------- 시작 ---------- */
+  var local = loadLocal();
+  if (local) S = local;
+  if (topUp()) save();
+  route();
+
+  (async function () {
+    try {
+      if (!window.claude || !claude.use) return;
+      var res = await Promise.all([claude.use('db'), claude.use('user')]);
+      var db = res[0], user = res[1];
+      if (!db || !user) return;
+      var id = await user.id();
+      if (!id) return;
+      docRef = db.doc('data/users/' + id + '/money');
+      var snap = await docRef.get();
+      var remote = snap.exists ? (snap.data() || {}).money : null;
+      if (remote && typeof remote === 'object' && (remote.saved || 0) > (S.saved || 0)) {
+        S = norm(remote);
+        if (topUp()) save(); else writeLocal();
+        paint();
+      } else if (S.saved) {
+        flush();
+      }
+    } catch (e) { docRef = null; }
+  })();
+})();
+</script>
+
+</body></html>
