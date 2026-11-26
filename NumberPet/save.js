@@ -92,7 +92,7 @@ function readSave() {
         file.hp >= rules.initialHp && file.growthStage >= 1 &&
         file.growthStage <= rules.growthTargets.length + 1 && file.mood <= rules.mood.max &&
         (rules.growthTargets[file.growthStage - 1] === undefined || file.hp < rules.growthTargets[file.growthStage - 1]) &&
-        ["dog", "cat", "rabbit", null].includes(file.pet) &&
+        (file.pet === null || Object.hasOwn(petSpecies, file.pet)) &&
         typeof file.petName === "string" && file.petName.length <= rules.petNameLength &&
         validCounts(file.day, ["flour", "stages", "total", "answered", "correct", "earned"]) &&
         validCounts(file.totals, ["answered", "correct", "earned"]) && file.totals.correct <= file.totals.answered &&

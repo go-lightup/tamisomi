@@ -1,13 +1,11 @@
 "use strict";
 
 const el = id => document.getElementById(id);
-const pets = { dog: ["🐶", "강아지"], cat: ["🐱", "고양이"], rabbit: ["🐰", "토끼"] };
+const pets = petSpecies;
 const levels = ["한 자리 더하기·빼기", "올림·내림 첫걸음", "두 자리 올림·내림", "숨은 수 X 찾기", "두 자리 혼합 연산"];
 const file = readSave();
 const boxButtons = new Map();
 let screen = file.stage ? "play" : file.result?.view === "care" ? "care" : file.result ? "result" : "home";
-let animation = "";
-let animationTimer;
 let lastSave = 0;
 let playable = Boolean(window.Phaser);
 let adminMode = Boolean(file.stage?.admin || file.result?.admin);
@@ -54,14 +52,8 @@ function button(label, action, className = "secondary") {
   return control;
 }
 
-function animatePet(action) {
-  clearTimeout(animationTimer);
-  animation = action;
-  renderPet();
-  animationTimer = setTimeout(() => {
-    animation = "";
-    renderPet();
-  }, 1500);
+function petMood() {
+  return file.mood >= rules.mood.cheerful ? "happy" : file.mood <= rules.mood.quiet ? "sad" : "neutral";
 }
 
 function renderPet() {
@@ -83,18 +75,14 @@ function renderPet() {
     pet.hidden = true;
     return;
   }
-  const [icon, name] = pets[file.pet];
+  const { name } = pets[file.pet];
   el("petName").textContent = file.petName || name;
   const resting = screen !== "play" && !canStartToday() && file.day.stages >= rules.dailyFlour;
   const cheerful = file.mood >= rules.mood.cheerful;
   const quiet = file.mood <= rules.mood.quiet;
-  const expression = cheerful ? "😊" : quiet ? "😒" : "";
   pet.hidden = false;
-  pet.className = ["pet", animation || (resting ? "sleep" : "")].join(" ");
   pet.setAttribute("aria-label", `${file.petName || name} 성장 ${growth}단계${cheerful ? " 웃는 표정" : quiet ? " 토라진 표정" : ""}`);
-  pet.style.setProperty("--growth", growth - 1);
-  const sparkle = resting && !animation ? "💤" : animation === "feed" ? "🍪" : growth > 1 ? "✦".repeat(growth - 1) : "";
-  pet.innerHTML = `<span class="animal" aria-hidden="true">${icon}</span><span class="eyes" aria-hidden="true">ᴗ ᴗ</span><span class="sparkle" aria-hidden="true">${sparkle}</span>${expression ? `<span class="pet-expression" aria-hidden="true">${expression}</span>` : ""}`;
+  if (screen !== "result") petView.show(pet, file.pet, growth, petMood(), resting);
 }
 
 function refreshDay() {
@@ -109,18 +97,15 @@ function renderHome() {
   el("pets").replaceChildren();
   const chosen = Boolean(pets[file.pet]);
   if (!chosen) {
-    for (const [id, [icon, name]] of Object.entries(pets)) {
-      if (id === "rabbit") continue;
+    for (const [id, { name, legacy }] of Object.entries(pets)) {
+      if (legacy) continue;
       const control = button(name, () => {
         file.pet = id;
         persist();
         render();
         el("petNameInput").focus();
       });
-      const face = document.createElement("span");
-      face.textContent = icon;
-      face.setAttribute("aria-hidden", "true");
-      control.prepend(face);
+      control.prepend(petView.portrait(id, 1));
       el("pets").append(control);
     }
   }
@@ -191,7 +176,7 @@ function renderCare() {
       persist();
       render();
       petChatter(care.reaction, `${care.reaction} 꼬옥 안아 줄래? ♡`, "…고마워.");
-      animatePet(care.animation);
+      petView.play(care.animation);
     });
     const icon = document.createElement("span");
     icon.className = "shop-icon";
@@ -323,13 +308,14 @@ function answer(box, value) {
     speak(outcome.item
       ? `✓ ${file.stage.streak}연속 정답 콤보! 🍪 +${outcome.cookies} · ${rules.items[outcome.item].label} 획득!`
       : `✓ 정답! 쿠키 ${outcome.cookies}개 받았어. 🍪`, "correct");
-    animatePet("happy");
+    petView.play("correct", "cookie");
   } else {
     speak(`✕ 오답. 같이 확인해 보자.\n${correction}`, "incorrect");
+    petView.play("wrong");
   }
 
   if (file.stage.resolved === rules.problems) {
-    endStage(false, correction);
+    endStage(false, correction, value === null ? [] : outcome.correct ? ["correct", "cookie"] : ["wrong"]);
     return;
   }
   el("cookies").textContent = file.cookies;
@@ -338,7 +324,8 @@ function answer(box, value) {
   persist();
 }
 
-function endStage(quit = false, correction = "") {
+function endStage(quit = false, correction = "", answerClips = []) {
+  const previousGrowth = file.growthStage;
   finishStage(file, quit);
   if (correction) file.result.correction = correction;
   boxButtons.clear();
@@ -347,11 +334,13 @@ function endStage(quit = false, correction = "") {
   settlePet(file);
   persist();
   render();
+  if (!quit) petView.play(...answerClips, "dance", ...(file.result.mealCookies ? ["feed"] : []),
+    ...(file.growthStage > previousGrowth ? ["grow"] : []));
   el("resultTitle").focus();
 }
 
 function renderResultPet(result) {
-  const [icon, species] = pets[file.pet];
+  const { name: species } = pets[file.pet];
   const card = document.createElement("div");
   card.className = "result-pet";
   const voice = document.createElement("p");
@@ -361,9 +350,9 @@ function renderResultPet(result) {
     file.mood >= rules.mood.cheerful ? "너랑 같이 풀어서 정말 신나! ♡" : "함께 풀어서 기분이 좋아!";
   voice.textContent = result.mealCookies ? `냠냠, 맛있게 먹을게.\n${moodLine}` : moodLine;
   const face = document.createElement("span");
-  face.className = result.mealCookies ? "result-pet-face meal-face" : "result-pet-face";
+  face.className = "result-pet-face";
+  face.id = "resultPetFace";
   face.setAttribute("aria-hidden", "true");
-  face.textContent = icon;
   const caption = document.createElement("b");
   caption.textContent = `${file.petName || species} · 기분 ${file.mood} / ${rules.mood.max}`;
   card.append(voice, face, caption);
@@ -386,7 +375,11 @@ function renderResult() {
     <div class="score"><div>획득 쿠키<strong>+${result.earned + result.extra}</strong></div>
     ${result.quit ? `<div>진행 문제<strong>${result.resolved} / ${result.total}</strong></div>`
       : `<div>모래시계 보너스<strong>+${result.extra}</strong></div>`}</div>`;
-  if (pets[file.pet]) el("resultTitle").after(renderResultPet(result));
+  if (pets[file.pet]) {
+    el("resultTitle").after(renderResultPet(result));
+    petView.show(el("resultPetFace"), file.pet, file.growthStage, petMood(),
+      !result.admin && !file.day.flour);
+  }
   if (result.correction) {
     const correction = document.createElement("p");
     correction.className = "speech result-note";
@@ -439,7 +432,7 @@ function renderResult() {
     petChatter("내 기분을 확인해 볼래?", "오늘 같이 놀아서 정말 좋았어! ♡");
     persist();
     render();
-    if (file.result.mealCookies && file.hp === rules.initialHp) animatePet("grow");
+    petView.play();
     el("careTitle").focus();
   }, "primary"));
 }

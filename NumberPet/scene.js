@@ -32,9 +32,11 @@ function createWorld(onFrame) {
         art = this.add.graphics();
         this.scale.on("resize", size => paint(size.width, size.height));
         paint(this.scale.width, this.scale.height);
+        petView.connect(this);
       },
       update(_time, delta) {
         onFrame(Math.min(delta, 50));
+        petView.update(Math.min(delta, 50));
       },
     },
   });
