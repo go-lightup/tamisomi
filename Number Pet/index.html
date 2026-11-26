@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="하늘에서 내려오는 수학 상자를 풀고 쿠키로 나만의 펫을 키워요.">
+  <title>Number Pet | 넘버 펫</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
+  <script defer src="config.js"></script>
+  <script defer src="save.js"></script>
+  <script defer src="logic.js"></script>
+  <script defer src="scene.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <h1><span aria-hidden="true">✦</span> Number Pet</h1>
+      <div class="wallet"><span>🍪 <span class="label">쿠키</span> <b id="cookies">0</b></span><span>🌾 <span class="label">밀가루</span> <b id="flour"></b></span></div>
+    </header>
+    <p id="error" role="alert" hidden></p>
+    <section class="world" aria-label="더하기·빼기 나라">
+      <div id="canvas" aria-hidden="true"></div>
+      <div id="boxes"></div>
+      <aside id="petArea" class="pet-area" aria-label="펫 상태" hidden>
+        <p id="feedback" class="speech" role="status"></p>
+        <div id="pet" class="pet" role="img" aria-label="펫"></div>
+        <strong id="petName" class="pet-name"></strong>
+        <b id="petGrowth"></b>
+        <label for="petHpBar" id="petHp"></label>
+        <progress id="petHpBar"></progress>
+        <label for="petMood" id="moodLabel"></label>
+        <progress id="petMood"></progress>
+        <span id="petCookies"></span>
+        <div id="items" class="items" aria-label="보유 아이템"></div>
+        <p id="itemStatus" class="item-status" hidden></p>
+        <section id="petCare" class="pet-care" aria-label="아이템 Shop" hidden></section>
+      </aside>
+      <section id="home" class="panel">
+        <p class="country">✦ 수학 나라</p>
+        <h2 id="homeTitle">더하기·빼기 나라</h2>
+        <p id="homeNote">함께 모험할 펫을 골라요.</p>
+        <div id="pets" class="pet-choices"></div>
+        <form id="petNameForm" hidden>
+          <label for="petNameInput">펫 이름</label>
+          <input id="petNameInput" required autocomplete="off">
+          <button class="secondary">이름 정하기</button>
+        </form>
+        <div id="levelPicker" hidden role="group" aria-label="연산 레벨">
+          <b>연산 레벨</b>
+          <div id="levels"></div>
+        </div>
+        <button id="start" class="primary" hidden>스테이지 시작</button>
+        <details id="adminPanel" class="admin-panel">
+          <summary>관리자 모드</summary>
+          <form id="adminForm">
+            <label for="adminPin">비밀번호</label>
+            <div class="pin-entry">
+              <input id="adminPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required>
+              <button class="secondary">켜기</button>
+            </div>
+          </form>
+          <button type="button" class="secondary" id="adminOff" hidden>관리자 모드 끄기</button>
+          <p id="adminMessage" role="status"></p>
+        </details>
+      </section>
+      <section id="play" hidden aria-label="스테이지">
+        <div class="hud">
+          <b id="progress"></b>
+          <div class="sand"><span class="hourglass" aria-hidden="true">⏳</span><progress id="sand" max="1" value="1" aria-label="모래시계 남은 모래"></progress></div>
+          <button id="quit" class="secondary" type="button">나가기</button>
+        </div>
+        <div class="answer-tray">
+          <b id="problem">상자를 눌러 문제를 풀어요.</b>
+          <div id="choices" class="choices"></div>
+        </div>
+      </section>
+      <section id="result" class="panel" hidden></section>
+    </section>
+    <footer>밀가루는 매일 아침 7시에 채워져요.</footer>
+  </main>
+</body>
+</html>

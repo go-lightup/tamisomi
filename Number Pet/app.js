@@ -1,0 +1,501 @@
+"use strict";
+
+const el = id => document.getElementById(id);
+const pets = { dog: ["🐶", "강아지"], cat: ["🐱", "고양이"], rabbit: ["🐰", "토끼"] };
+const levels = ["한 자리 더하기·빼기", "올림·내림 첫걸음", "두 자리 올림·내림", "숨은 수 X 찾기", "두 자리 혼합 연산"];
+const file = readSave();
+const boxButtons = new Map();
+let screen = file.stage ? "play" : file.result ? "result" : "home";
+let animation = "";
+let animationTimer;
+let lastSave = 0;
+let playable = Boolean(window.Phaser);
+let adminMode = Boolean(file.stage?.admin || file.result?.admin);
+let selectedLevel = file.stage?.level ?? file.result?.level ?? file.growthStage;
+
+function canStartToday() {
+  return adminMode || file.day.flour > 0;
+}
+
+function speak(message, tone = "") {
+  const feedback = el("feedback");
+  feedback.dataset.tone = tone;
+  if (feedback.textContent !== message) feedback.textContent = message;
+}
+
+function petChatter(message, cheerful, quiet = "") {
+  speak(file.mood >= rules.mood.cheerful ? cheerful : file.mood <= rules.mood.quiet ? quiet : message);
+}
+
+function error(message) {
+  el("error").textContent = message;
+  el("error").hidden = false;
+}
+
+function persist() {
+  if (writeSave(file)) return true;
+  error("기록을 저장할 수 없어요. 브라우저의 사이트 저장 설정을 확인해 주세요.");
+  return false;
+}
+
+function button(label, action, className = "secondary") {
+  const control = document.createElement("button");
+  control.type = "button";
+  control.className = className;
+  control.textContent = label;
+  control.addEventListener("click", action);
+  return control;
+}
+
+function animatePet(action) {
+  clearTimeout(animationTimer);
+  animation = action;
+  renderPet();
+  animationTimer = setTimeout(() => {
+    animation = "";
+    renderPet();
+  }, 1500);
+}
+
+function renderPet() {
+  const pet = el("pet");
+  const area = el("petArea");
+  area.hidden = !pets[file.pet];
+  const growth = file.growthStage;
+  const target = rules.growthTargets[growth - 1];
+  el("petGrowth").textContent = `성장 ${growth}단계`;
+  el("petHp").textContent = target === undefined ? `경험치 ${file.hp} · 최고 단계` : `경험치 ${file.hp} / ${target}`;
+  el("petHpBar").max = target ?? file.hp;
+  el("petHpBar").value = file.hp;
+  el("moodLabel").textContent = `기분 ${file.mood} / ${rules.mood.max}`;
+  el("petMood").max = rules.mood.max;
+  el("petMood").value = file.mood;
+  el("petCookies").textContent = `🍪 쿠키 ${file.cookies}`;
+  if (!pets[file.pet]) {
+    pet.replaceChildren();
+    pet.hidden = true;
+    return;
+  }
+  const [icon, name] = pets[file.pet];
+  el("petName").textContent = file.petName || name;
+  const resting = screen !== "play" && !canStartToday() && file.day.stages >= rules.dailyFlour;
+  const cheerful = file.mood >= rules.mood.cheerful;
+  const quiet = file.mood <= rules.mood.quiet;
+  const expression = cheerful ? "😊" : quiet ? "😒" : "";
+  pet.hidden = false;
+  pet.className = ["pet", animation || (resting ? "sleep" : "")].join(" ");
+  pet.setAttribute("aria-label", `${file.petName || name} 성장 ${growth}단계${cheerful ? " 웃는 표정" : quiet ? " 토라진 표정" : ""}`);
+  pet.style.setProperty("--growth", growth - 1);
+  const sparkle = resting && !animation ? "💤" : animation === "feed" ? "🍪" : growth > 1 ? "✦".repeat(growth - 1) : "";
+  pet.innerHTML = `<span class="animal" aria-hidden="true">${icon}</span><span class="eyes" aria-hidden="true">ᴗ ᴗ</span><span class="sparkle" aria-hidden="true">${sparkle}</span>${expression ? `<span class="pet-expression" aria-hidden="true">${expression}</span>` : ""}`;
+}
+
+function refreshDay() {
+  // 진행 중인 스테이지는 시작한 도전일에 계산하고 결과 확인 후 재충전한다.
+  if (!playable || screen !== "home" || file.day.key === dayKey()) return;
+  file.day = newDay();
+  persist();
+  render();
+}
+
+function renderHome() {
+  el("pets").replaceChildren();
+  const chosen = Boolean(pets[file.pet]);
+  if (!chosen) {
+    for (const [id, [icon, name]] of Object.entries(pets)) {
+      if (id === "rabbit") continue;
+      const control = button(name, () => {
+        file.pet = id;
+        persist();
+        render();
+        el("petNameInput").focus();
+      });
+      const face = document.createElement("span");
+      face.textContent = icon;
+      face.setAttribute("aria-hidden", "true");
+      control.prepend(face);
+      el("pets").append(control);
+    }
+  }
+  const named = chosen && Boolean(file.petName);
+  el("petNameForm").hidden = !chosen || named;
+  el("levelPicker").hidden = !named;
+  el("start").hidden = !named;
+  el("start").disabled = !playable || !canStartToday();
+  el("adminForm").hidden = adminMode;
+  el("adminOff").hidden = !adminMode;
+  el("adminPanel").querySelector("summary").textContent = adminMode ? "관리자 모드 켜짐" : "관리자 모드";
+  if (!chosen) return;
+  el("homeNote").textContent = named ? `내 펫 · ${file.petName}` : "함께 모험할 펫의 이름을 지어 주세요.";
+  if (!named) return;
+  if (canStartToday()) petChatter("안녕! 나랑 수학 상자를 풀어 볼래?", "헤헤, 또 만나서 좋아! 나랑 같이 놀자! ♡", "흥…");
+  else petChatter("오늘도 수고했어! 우리 내일 또 만나.", "내일도 꼭 만나자! 기다릴게! ♡", "…");
+  if (!adminMode) selectedLevel = file.growthStage;
+  const picker = el("levels");
+  picker.replaceChildren(...levels.map((label, index) => {
+    const level = index + 1;
+    const locked = !adminMode && level !== file.growthStage;
+    const control = button(`레벨 ${level} · ${label}`, () => {
+      selectedLevel = level;
+      for (const entry of picker.children) entry.setAttribute("aria-pressed", String(entry === control));
+    });
+    control.disabled = locked || !playable;
+    control.setAttribute("aria-pressed", String(level === selectedLevel));
+    return control;
+  }));
+}
+
+function render() {
+  el("home").hidden = screen !== "home";
+  el("play").hidden = screen !== "play";
+  el("result").hidden = screen !== "result";
+  document.querySelector(".world").classList.toggle("has-pet", Boolean(pets[file.pet]));
+  el("boxes").hidden = screen !== "play";
+  el("items").hidden = screen !== "play";
+  if (screen !== "play") el("itemStatus").hidden = true;
+  el("cookies").textContent = file.cookies;
+  el("flour").textContent = adminMode ? "∞" : `${file.day.flour} / ${rules.dailyFlour}`;
+  renderPet();
+  renderCare();
+  if (screen === "home") renderHome();
+  if (screen === "play") renderPlay();
+  if (screen === "result") renderResult();
+}
+
+function renderCare() {
+  const area = el("petCare");
+  area.replaceChildren();
+  area.hidden = screen !== "result" || !file.result?.petSettled;
+  if (area.hidden) return;
+  const heading = document.createElement("h3");
+  heading.textContent = "아이템 Shop";
+  area.append(heading);
+  for (const care of Object.values(rules.care)) {
+    const purchase = button(`${care.icon} ${care.label} · 🍪 ${care.cost} · 기분 +${care.mood}`, () => {
+      if (!playable || !buyCare(file, care)) return;
+      persist();
+      render();
+      petChatter(care.reaction, `${care.reaction} 꼬옥 안아 줄래? ♡`, "…고마워.");
+      animatePet(care.animation);
+    });
+    purchase.disabled = !playable || file.cookies < care.cost || file.mood >= rules.mood.max;
+    area.append(purchase);
+  }
+}
+
+function renderChoices() {
+  const stage = file.stage;
+  const selected = stage.selected;
+  const box = stage.boxes.find(candidate => candidate.id === selected?.id);
+  el("problem").textContent = box ? questionLabel(box) : "상자를 눌러 문제를 풀어요.";
+  el("choices").replaceChildren(...(selected?.choices ?? []).map(value =>
+    button(String(value), () => {
+      if (file.stage?.selected === selected) answer(box, value);
+    }, "balloon")));
+}
+
+function renderPlay(updateChoices = true) {
+  const stage = file.stage;
+  el("progress").textContent = `레벨 ${stage.level} · ${stage.resolved} / ${rules.problems} · 🍪 ${stage.earned}`;
+  el("items").replaceChildren(...Object.entries(rules.items)
+    .filter(([id]) => stage.admin || file.items[id] > 0)
+    .map(([id, item]) => {
+      const control = button(`${item.label} ${stage.admin ? "∞" : `×${file.items[id]}`}`, () => useItem(id));
+      control.disabled = Boolean(stage.timedEffect);
+      return control;
+    }));
+  renderItemStatus(stage);
+  if (updateChoices) renderChoices();
+}
+
+function renderItemStatus(stage) {
+  const status = el("itemStatus");
+  const effect = stage.timedEffect;
+  status.hidden = !effect;
+  if (!effect) return;
+  const remaining = effect.id === "slow" ? "적용 중" : `${Math.ceil((effect.until - stage.elapsed) / 1000)}초 남음`;
+  const label = `${rules.items[effect.id].label} · ${remaining}`;
+  if (status.textContent !== label) status.textContent = label;
+}
+
+function selectBox(box) {
+  const stage = file.stage;
+  if (!playable || !stage || stage.selected || !stage.boxes.includes(box)) return;
+  const intermediate = stage.mode === "intermediate";
+  const count = rules.options[stage.mode];
+  stage.selected = { id: box.id, until: stage.elapsed + rules.pauseMs, choices: makeChoices(box.answer, count, intermediate) };
+  petChatter("정답 풍선을 골라 봐!", "우리 같이 정답 풍선을 찾아보자! ♡");
+  renderChoices();
+  persist();
+}
+
+function useItem(id) {
+  const stage = file.stage;
+  if (!playable || !stage || !Object.hasOwn(rules.items, id) || (!stage.admin && !file.items[id]) ||
+      stage.timedEffect || (id === "slow" && !stage.boxes.length)) return;
+  if (!stage.admin) file.items[id]--;
+  stage.timedEffect = id === "slow"
+    ? { id, targets: stage.boxes.map(box => box.id) }
+    : { id, until: stage.elapsed + rules.items[id].duration };
+  speak(rules.items[id].label + " 아이템을 썼어!");
+  persist();
+  renderPlay();
+}
+
+function answer(box, value) {
+  if (!playable || !file.stage) return;
+  const outcome = resolveBox(file, box, value);
+  if (!outcome) return;
+  boxButtons.get(box.id)?.remove();
+  boxButtons.delete(box.id);
+
+  if (value === null) {
+    if (!file.stage.selected && !el("feedback").dataset.tone) {
+      petChatter("상자가 지나갔어. 다음 상자를 풀어 보자!", "다음 상자도 같이 풀어 보자! ♡");
+    }
+  } else if (outcome.correct) {
+    speak(outcome.item
+      ? `✓ ${file.stage.streak}연속 정답 콤보! 🍪 +${outcome.cookies} · ${rules.items[outcome.item].label} 획득!`
+      : `✓ 정답! 쿠키 ${outcome.cookies}개 받았어. 🍪`, "correct");
+    animatePet("happy");
+  } else {
+    speak(`✕ 오답. 같이 확인해 보자. ${solutionLabel(box)}`, "incorrect");
+  }
+
+  if (file.stage.resolved === rules.problems) {
+    endStage();
+    return;
+  }
+  el("cookies").textContent = file.cookies;
+  el("petCookies").textContent = `🍪 쿠키 ${file.cookies}`;
+  renderPlay(value !== null);
+  persist();
+}
+
+function endStage(quit = false) {
+  finishStage(file, quit);
+  boxButtons.clear();
+  el("boxes").replaceChildren();
+  screen = "result";
+  if (quit) speak("지금까지 모은 쿠키를 챙겼어.");
+  feedWithAnimation();
+  persist();
+  render();
+}
+
+function feedWithAnimation() {
+  const before = file.growthStage;
+  if (!settlePet(file)) {
+    if (file.mood <= rules.mood.quiet && !el("feedback").dataset.tone) speak("흥…");
+    return;
+  }
+  animatePet("feed");
+  if (file.growthStage > before) setTimeout(() => animatePet("grow"), 1500);
+}
+
+function renderResult() {
+  const result = file.result;
+  const area = el("result");
+  const accuracy = result.total ? Math.round(100 * result.correct / result.total) : 0;
+  area.innerHTML = `
+    <p class="country">레벨 ${result.level}</p>
+    <h2>${result.quit ? "스테이지를 나왔어요" : !result.admin && !file.day.flour ? "오늘의 모험을 마쳤어요!" : "스테이지 완료!"}</h2>
+    <div class="score-chart">
+      <div><b>정답 ${result.correct} / ${result.total}</b><span>${accuracy}%</span></div>
+      <progress max="100" value="${accuracy}" aria-label="스테이지 정답률"></progress>
+    </div>
+    <div class="score"><div>획득 쿠키<strong>+${result.earned + result.extra}</strong></div>
+    ${result.quit ? `<div>진행 문제<strong>${result.resolved} / ${result.total}</strong></div>`
+      : `<div>모래시계 보너스<strong>+${result.extra}</strong></div>`}</div>`;
+  if (result.growth) {
+    const growth = document.createElement("p");
+    growth.className = "growth-result";
+    growth.textContent = result.growth.includes("쿠키") && result.growth.includes("HP")
+      ? "경험치 +1" : result.growth;
+    area.append(growth);
+  }
+  if (result.noGiftLoss) {
+    const mood = document.createElement("p");
+    mood.className = "mood-result";
+    mood.textContent = `기분 −${result.noGiftLoss} · 선물을 주면 회복돼요.`;
+    area.append(mood);
+  }
+  if (!result.admin && !file.day.flour) {
+    const dailyAccuracy = file.day.total ? Math.round(100 * file.day.correct / file.day.total) : 0;
+    const summary = document.createElement("details");
+    summary.className = "daily-result";
+    summary.innerHTML = `<summary>오늘의 기록</summary>
+      <div class="score"><div>정답 / 전체<strong>${file.day.correct} / ${file.day.total}</strong></div>
+      <div>정답률<strong>${dailyAccuracy}%</strong></div><div>획득 쿠키<strong>${file.day.earned}</strong></div></div>`;
+    area.append(summary);
+  }
+  area.append(button(canStartToday() ? "다음 스테이지 선택" : "오늘의 모험 닫기", () => {
+    file.result = null;
+    screen = "home";
+    refreshDay();
+    persist();
+    render();
+  }, "primary"));
+}
+
+function spawnBox(stage) {
+  // 연속 상자는 서로 다른 줄을 사용해 동시에 선택할 수 있다.
+  stage.lane = (stage.lane + randomInt(1, 2)) % 3;
+  stage.boxes.push({ ...makeProblem(stage.level), id: stage.spawned++, lane: stage.lane, y: 0 });
+  stage.nextSpawn = stage.elapsed + rules.spawnMs;
+}
+
+function frame(delta) {
+  const stage = file.stage;
+  if (!playable || !stage || document.hidden) return;
+  const fieldHeight = document.querySelector(".answer-tray").offsetTop - 108;
+  stage.elapsed += delta;
+  el("sand").value = Math.max(0, 1 - stage.elapsed / rules.hourglassMs);
+  if (stage.selected && stage.selected.until <= stage.elapsed) {
+    stage.selected = null;
+    renderChoices();
+    petChatter("시간이 다 됐어. 상자를 다시 눌러도 돼!", "괜찮아! 상자를 다시 눌러서 같이 풀자! ♡");
+    persist();
+  }
+  let effect = stage.timedEffect;
+  if (effect && (effect.id === "slow"
+    ? !stage.boxes.some(box => effect.targets.includes(box.id))
+    : effect.until <= stage.elapsed)) {
+    stage.timedEffect = null;
+    effect = null;
+    renderPlay(false);
+  }
+  renderItemStatus(stage);
+  const speed = fallSpeed(file, stage.mode);
+  if (stage.spawned < rules.problems && stage.elapsed >= stage.nextSpawn && effect?.id !== "freeze") spawnBox(stage);
+  for (const box of stage.boxes) {
+    if (file.stage !== stage) break;
+    const selected = stage.selected?.id === box.id;
+    const speedFactor = effect?.id === "freeze" ? 0 :
+      effect?.id === "slow" && effect.targets.includes(box.id) ? rules.items.slow.speed : 1;
+    const movement = delta / 1000 * speed * speedFactor;
+    // 선택한 상자만 풀이 시간 동안 멈춘다.
+    if (!selected) box.y += movement;
+    if (!selected && box.y > fieldHeight) {
+      answer(box, null);
+      continue;
+    }
+    let control = boxButtons.get(box.id);
+    if (!control) {
+      control = button(box.text, () => selectBox(box), "box");
+      boxButtons.set(box.id, control);
+      el("boxes").append(control);
+    }
+    const minX = control.offsetWidth / 2;
+    const laneX = el("boxes").clientWidth * [0.17, 0.5, 0.83][box.lane];
+    control.style.left = `${Math.max(minX, Math.min(laneX, el("boxes").clientWidth - minX))}px`;
+    control.style.top = `${87 + box.y}px`;
+    control.classList.toggle("active", selected);
+    control.setAttribute("aria-pressed", String(selected));
+  }
+  if (file.stage && stage.elapsed - lastSave >= 750) {
+    lastSave = stage.elapsed;
+    persist();
+  }
+}
+
+el("start").addEventListener("click", () => {
+  if (!playable || !file.petName || !persist()) return;
+  refreshDay();
+  if (!startStage(file, selectedLevel, adminMode)) return;
+  lastSave = 0;
+  screen = "play";
+  petChatter("상자를 눌러 문제를 풀어 보자!", "우리 팀 출발! 나랑 같이 풀어 줘! ♡", "…");
+  persist();
+  render();
+});
+
+el("petNameInput").maxLength = rules.petNameLength;
+el("petNameInput").addEventListener("input", event => event.target.setCustomValidity(""));
+el("petNameForm").addEventListener("submit", event => {
+  event.preventDefault();
+  if (!playable || !file.pet || file.petName) return;
+  const input = el("petNameInput");
+  const name = input.value.trim();
+  if (!name || name.length > rules.petNameLength) {
+    input.setCustomValidity(`펫 이름을 ${rules.petNameLength}자 이내로 입력해 주세요.`);
+    input.reportValidity();
+    return;
+  }
+  file.petName = name;
+  persist();
+  render();
+  el("start").focus();
+});
+
+el("quit").addEventListener("click", () => {
+  if (playable && file.stage) endStage(true);
+});
+el("adminForm").addEventListener("submit", event => {
+  event.preventDefault();
+  if (!playable) return;
+  const pin = el("adminPin");
+  if (pin.value !== "0000") {
+    el("adminMessage").textContent = "비밀번호를 다시 확인해 주세요.";
+    return;
+  }
+  pin.value = "";
+  el("adminMessage").textContent = "모든 레벨과 스테이지 아이템을 자유롭게 이용할 수 있어요.";
+  adminMode = true;
+  render();
+});
+el("adminOff").addEventListener("click", () => {
+  adminMode = false;
+  el("adminMessage").textContent = "";
+  render();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (!playable) return;
+  if (document.hidden && file.stage) persist();
+  if (!document.hidden) refreshDay();
+});
+window.addEventListener("pagehide", () => {
+  if (playable && file.stage) persist();
+});
+window.addEventListener("storage", event => {
+  if (event.key !== storageKey) return;
+  playable = false;
+  error("다른 탭에서 기록이 바뀌었어요. 이 탭을 새로고침하면 최신 기록에서 이어갈 수 있어요.");
+  el("start").disabled = true;
+  document.querySelectorAll("#boxes button, #play button, #result button, #pets button, #petCare button, #levels button, #petNameForm button").forEach(control => { control.disabled = true; });
+});
+
+if (file.stage) {
+  lastSave = file.stage.elapsed;
+  // 이전 버전의 상자에도 새 문제 규칙을 적용한다.
+  for (const box of file.stage.boxes) {
+    if (box.answer === 0 || (file.stage.level === 1 && box.text.split(" ").includes("0"))) {
+      Object.assign(box, makeProblem(file.stage.level));
+      if (file.stage.selected?.id === box.id) file.stage.selected = null;
+    }
+  }
+  if (file.stage.selected) {
+    const selected = file.stage.selected;
+    selected.until = Math.min(selected.until, file.stage.elapsed + rules.pauseMs);
+    const { answer } = file.stage.boxes.find(box => box.id === selected.id);
+    if (!selected.choices.some(value => value !== answer && value % 10 === answer % 10)) {
+      selected.choices = makeChoices(answer, rules.options[file.stage.mode], file.stage.mode === "intermediate");
+    }
+  }
+  if (file.stage.timedEffect?.id === "freeze") {
+    file.stage.timedEffect.until = Math.min(file.stage.timedEffect.until, file.stage.elapsed + rules.items.freeze.duration);
+  }
+  petChatter(file.stage.selected ? "정답 풍선을 골라 봐!" : "이어서 상자를 풀어 보자!", "다시 왔구나! 같이 풀자! ♡");
+} else if (file.result) {
+  if (!file.result.petSettled) {
+    settlePet(file);
+    persist();
+  }
+  petChatter("스테이지를 끝냈어. 수고했어!", "같이 풀어서 정말 좋았어! ♡", "…");
+}
+if (playable) createWorld(frame);
+else error("게임 엔진을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.");
+refreshDay();
+render();
+setInterval(refreshDay, 15000);
