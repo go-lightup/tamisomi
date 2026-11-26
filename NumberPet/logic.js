@@ -124,6 +124,9 @@ function finishStage(file, quit = false) {
     file.day.answered += stage.answered;
     file.day.correct += stage.correct;
     file.day.earned += stage.earned + extra;
+    file.totals.answered += stage.answered;
+    file.totals.correct += stage.correct;
+    file.totals.earned += stage.earned + extra;
   }
   file.result = {
     total: rules.problems, resolved: stage.resolved, answered: stage.answered, correct: stage.correct,

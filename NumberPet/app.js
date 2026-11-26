@@ -300,10 +300,32 @@ function endStage(quit = false, correction = "") {
   el("resultTitle").focus();
 }
 
+function renderResultPet(result) {
+  const [icon, species] = pets[file.pet];
+  const card = document.createElement("div");
+  card.className = "result-pet";
+  const voice = document.createElement("p");
+  voice.className = "speech";
+  const requests = ["간식 하나 사 줄래? 🍎", "장난감 사서 같이 놀자! 🧸"];
+  const moodLine = file.mood <= 50 ? requests[(file.day.stages + result.correct) % requests.length] :
+    file.mood >= rules.mood.cheerful ? "너랑 같이 풀어서 정말 신나! ♡" : "함께 풀어서 기분이 좋아!";
+  voice.textContent = result.mealCookies ? `냠냠, 맛있게 먹을게.\n${moodLine}` : moodLine;
+  const face = document.createElement("span");
+  face.className = result.mealCookies ? "result-pet-face meal-face" : "result-pet-face";
+  face.setAttribute("aria-hidden", "true");
+  face.textContent = icon;
+  const caption = document.createElement("b");
+  caption.textContent = `${file.petName || species} · 기분 ${file.mood} / ${rules.mood.max}`;
+  card.append(voice, face, caption);
+  return card;
+}
+
 function renderResult() {
   const result = file.result;
   const area = el("result");
   const accuracy = result.total ? Math.round(100 * result.correct / result.total) : 0;
+  const totals = file.totals;
+  const totalAccuracy = totals.answered ? Math.round(100 * totals.correct / totals.answered) : 0;
   area.innerHTML = `
     <p class="country">레벨 ${result.level}</p>
     <h2 id="resultTitle" tabindex="-1">${result.quit ? "스테이지를 나왔어요" : !result.admin && !file.day.flour ? "오늘의 모험을 마쳤어요!" : "스테이지 완료!"}</h2>
@@ -314,6 +336,7 @@ function renderResult() {
     <div class="score"><div>획득 쿠키<strong>+${result.earned + result.extra}</strong></div>
     ${result.quit ? `<div>진행 문제<strong>${result.resolved} / ${result.total}</strong></div>`
       : `<div>모래시계 보너스<strong>+${result.extra}</strong></div>`}</div>`;
+  if (pets[file.pet]) el("resultTitle").after(renderResultPet(result));
   if (result.correction) {
     const correction = document.createElement("p");
     correction.className = "speech result-note";
@@ -322,18 +345,9 @@ function renderResult() {
     area.append(correction);
   }
   if (result.mealCookies) {
-    const meal = document.createElement("div");
+    const meal = document.createElement("p");
     meal.className = "result-meal";
-    const voice = document.createElement("p");
-    voice.className = "speech";
-    voice.textContent = "냠냠, 맛있게 먹을게.";
-    const face = document.createElement("span");
-    face.className = "meal-face";
-    face.setAttribute("aria-hidden", "true");
-    face.textContent = pets[file.pet]?.[0] ?? "";
-    const detail = document.createElement("p");
-    detail.textContent = `쿠키 ${result.mealCookies}개를 먹고 경험치 1이 올라갔습니다.`;
-    meal.append(voice, face, detail);
+    meal.textContent = `쿠키 ${result.mealCookies}개를 먹고 경험치 1이 올라갔습니다.`;
     area.append(meal);
   }
   if (result.growth && result.growth !== "경험치 +1") {
@@ -349,6 +363,13 @@ function renderResult() {
     mood.textContent = `기분 −${result.moodLoss}`;
     area.append(mood);
   }
+  const cumulative = document.createElement("section");
+  cumulative.className = "cumulative-result";
+  cumulative.innerHTML = `<h3>누적 기록</h3>
+    <div class="score"><div>푼 문제<strong>${totals.answered.toLocaleString("ko-KR")}개</strong></div>
+    <div>정답률<strong>${totalAccuracy}%</strong></div>
+    <div>획득 쿠키<strong>${totals.earned.toLocaleString("ko-KR")}개</strong></div></div>`;
+  area.append(cumulative);
   if (!result.admin && !file.day.flour) {
     const notice = document.createElement("p");
     notice.className = "flour-notice";

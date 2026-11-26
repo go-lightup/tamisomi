@@ -63,17 +63,23 @@ function migrateGrowthSave(file) {
 
 function migrateSave(file) {
   file = migrateGrowthSave(file);
-  if (file?.version !== 3) return file;
-  file.version = 4;
-  file.petName = "";
-  if (file.result) {
-    const result = file.result;
-    // 삭제된 키패드 미션에 이미 지불한 쿠키는 돌려준다.
-    if (result.bonus === "active") file.cookies += 2;
-    result.earned += result.bonusEarned ?? 0;
-    delete result.bonus;
-    delete result.bonusEarned;
-    delete result.challenge;
+  if (file?.version === 3) {
+    file.version = 4;
+    file.petName = "";
+    if (file.result) {
+      const result = file.result;
+      // 삭제된 키패드 미션에 이미 지불한 쿠키는 돌려준다.
+      if (result.bonus === "active") file.cookies += 2;
+      result.earned += result.bonusEarned ?? 0;
+      delete result.bonus;
+      delete result.bonusEarned;
+      delete result.challenge;
+    }
+  }
+  if (file?.version === 4 && validCounts(file.day, ["answered", "correct", "earned"])) {
+    const { answered, correct, earned } = file.day;
+    file.totals = { answered, correct, earned };
+    file.version = 5;
   }
   return file;
 }
@@ -81,7 +87,7 @@ function migrateSave(file) {
 function readSave() {
   try {
     const file = migrateSave(JSON.parse(localStorage.getItem(storageKey)));
-    if (file?.version === 4 &&
+    if (file?.version === 5 &&
         validCounts(file, ["cookies", "hp", "growthStage", "mood", "clears"]) &&
         file.hp >= rules.initialHp && file.growthStage >= 1 &&
         file.growthStage <= rules.growthTargets.length + 1 && file.mood <= rules.mood.max &&
@@ -89,6 +95,7 @@ function readSave() {
         ["dog", "cat", "rabbit", null].includes(file.pet) &&
         typeof file.petName === "string" && file.petName.length <= rules.petNameLength &&
         validCounts(file.day, ["flour", "stages", "total", "answered", "correct", "earned"]) &&
+        validCounts(file.totals, ["answered", "correct", "earned"]) && file.totals.correct <= file.totals.answered &&
         typeof file.day.key === "string" &&
         file.day.flour <= rules.dailyFlour && !(file.stage && file.result) &&
         validCounts(file.items, Object.keys(rules.items)) &&
@@ -114,7 +121,8 @@ function readSave() {
     // 읽을 수 없는 데이터는 새 게임으로 복구한다.
   }
   return {
-    version: 4, pet: null, petName: "", cookies: 0, hp: rules.initialHp, growthStage: 1, mood: rules.mood.initial, clears: 0,
+    version: 5, pet: null, petName: "", cookies: 0, hp: rules.initialHp, growthStage: 1, mood: rules.mood.initial, clears: 0,
+    totals: { answered: 0, correct: 0, earned: 0 },
     items: { freeze: 0, slow: 0, double: 0 }, day: newDay(), stage: null, result: null,
   };
 }

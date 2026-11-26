@@ -136,10 +136,14 @@ progress { width: min(108px, 24vw); height: 9px; accent-color: #7151e4; }
 #careDone { max-width: 480px; }
 .result-note { margin: 10px 0; font-size: 1rem; }
 .result-note::after { display: none; }
-.result-meal { display: grid; justify-items: center; gap: 6px; margin-top: 12px; padding: 12px; background: #fff5d8; border-radius: 14px; }
-.result-meal p { margin: 0; }
-.result-meal .speech { padding: 8px 13px; }
-.meal-face { font-size: 1.9rem; line-height: 1.2; animation: munch .36s ease 4; }
+.result-pet { display: grid; justify-items: center; gap: 8px; margin-top: 12px; padding: 13px; background: #fff5d8; border-radius: 16px; }
+.result-pet .speech { padding: 8px 13px; font-size: 1rem; }
+.result-pet-face { font-size: clamp(4.2rem, 12vw, 6.25rem); line-height: 1.1; }
+.meal-face { animation: munch .36s ease 4; }
+.result-meal { margin: 9px 0; }
+.cumulative-result { margin-top: 14px; text-align: left; }
+.cumulative-result h3 { margin: 0; font-size: 1rem; }
+.cumulative-result .score { margin-top: 7px; text-align: center; }
 .flour-notice { margin: 8px 0; color: #50318f; font-weight: 800; overflow-wrap: anywhere; }
 footer { color: #485570; text-align: center; font-size: .9rem; margin-top: 10px; }
 #error { color: #9b2034; font-weight: 700; }
