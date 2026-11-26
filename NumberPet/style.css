@@ -72,6 +72,13 @@ progress { width: min(108px, 24vw); height: 9px; accent-color: #7151e4; }
 .items button { font-size: .8rem; padding-inline: 7px; }
 .item-status { margin: 0; color: #573aa8; font-weight: 800; }
 .answer-tray { position: absolute; inset: auto 8px 10px; text-align: center; background: #ffffffee; border-radius: 19px; padding: 9px 3px; min-height: 105px; }
+.answer-tray.has-hint-space { min-height: 205px; }
+.block-hint { display: grid; gap: 3px; width: min(100%, 390px); margin: 2px auto 5px; padding: 4px 6px; background: #f2f4ff; border-radius: 9px; }
+.block-row { display: grid; grid-template-columns: 2.5rem 1fr; align-items: center; text-align: left; min-height: 23px; gap: 4px; font-size: .84rem; }
+.block-pieces { display: flex; flex-wrap: wrap; align-items: end; gap: 2px; }
+.block-pieces span { display: block; width: 7px; border: 1px solid #354c9c; border-radius: 1px; }
+.block-pieces .ten { height: 21px; background: repeating-linear-gradient(to top, #6b8de9 0 1px, #b7cbff 1px 2px); }
+.block-pieces .one { height: 7px; background: #9ee3c3; border-color: #277e5f; }
 #problem { display: inline-block; min-height: 24px; }
 .choices { flex-wrap: wrap; gap: clamp(4px, 1.7vw, 13px); margin: 5px 0 4px; }
 .balloon {
@@ -132,7 +139,8 @@ progress { width: min(108px, 24vw); height: 9px; accent-color: #7151e4; }
 .world[data-screen="care"] .pet-area { min-height: min(550px, 72vh); gap: 9px; font-size: 1rem; }
 .world[data-screen="care"] .pet-care { width: min(100%, 480px); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .world[data-screen="care"] .pet-care h3 { grid-column: 1 / -1; }
-.world[data-screen="care"] .pet-care button { width: 100%; font-size: .91rem; }
+.world[data-screen="care"] .pet-care button { display: grid; justify-items: center; align-content: center; gap: 5px; width: 100%; padding: 9px 4px; font-size: .91rem; }
+.shop-icon { font-size: 2rem; line-height: 1.1; }
 #careDone { max-width: 480px; }
 .result-note { margin: 10px 0; font-size: 1rem; }
 .result-note::after { display: none; }
@@ -156,5 +164,6 @@ footer { color: #485570; text-align: center; font-size: .9rem; margin-top: 10px;
   .box { font-size: .77rem; }
   .panel { padding: 12px 9px; }
   .answer-tray { min-height: 146px; }
+  .answer-tray.has-hint-space { min-height: 218px; }
 }
 @media (prefers-reduced-motion: reduce) { .pet *, .meal-face { animation: none !important; } }

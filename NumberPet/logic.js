@@ -59,6 +59,30 @@ function questionLabel(problem) {
   return problem.equation ? `${problem.text} (X는?)` : `${problem.text} = ?`;
 }
 
+// 저장된 상자에도 힌트를 줄 수 있도록 식에서 피연산자를 읽는다.
+function regroupingHint(problem) {
+  const [a, sign, b, nextSign, c] = problem.text.split(" ");
+  const operation = (left, op, right) => {
+    const regroup = op === "+" ? left % 10 + right % 10 >= 10 : left % 10 < right % 10;
+    return regroup ? { left, op, right } : null;
+  };
+  if (problem.equation) {
+    const known = Number(c);
+    return sign === "+" ? operation(known, "−", Number(a)) : operation(Number(a), "−", known);
+  }
+  const left = Number(a);
+  const right = Number(b);
+  const first = operation(left, sign, right);
+  if (first || c === undefined) return first;
+  const subtotal = sign === "+" ? left + right : left - right;
+  return operation(subtotal, nextSign, Number(c));
+}
+
+function hintsEnabled(file) {
+  const target = rules.growthTargets[file.growthStage - 1];
+  return file.stage.level >= 2 && target !== undefined && file.hp * 2 < target;
+}
+
 function solutionLabel(problem) {
   return problem.equation ? `${problem.text}\nX = ${problem.answer}` : `${problem.text} = ${problem.answer}`;
 }

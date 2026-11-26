@@ -186,13 +186,23 @@ function renderCare() {
   heading.textContent = "아이템 Shop";
   area.append(heading);
   for (const care of Object.values(rules.care)) {
-    const purchase = button(`${care.icon} ${care.label} · 🍪 ${care.cost} · 기분 +${care.mood}`, () => {
+    const purchase = button("", () => {
       if (!playable || !buyCare(file, care)) return;
       persist();
       render();
       petChatter(care.reaction, `${care.reaction} 꼬옥 안아 줄래? ♡`, "…고마워.");
       animatePet(care.animation);
     });
+    const icon = document.createElement("span");
+    icon.className = "shop-icon";
+    icon.textContent = care.icon;
+    icon.setAttribute("role", "img");
+    icon.setAttribute("aria-label", care.label);
+    const price = document.createElement("span");
+    price.textContent = `쿠키 ${care.cost}개 필요`;
+    const mood = document.createElement("strong");
+    mood.textContent = `기분 +${care.mood}`;
+    purchase.append(icon, price, mood);
     purchase.disabled = !playable || file.cookies < care.cost || file.mood >= rules.mood.max;
     area.append(purchase);
   }
@@ -203,10 +213,42 @@ function renderChoices() {
   const selected = stage.selected;
   const box = stage.boxes.find(candidate => candidate.id === selected?.id);
   el("problem").textContent = box ? questionLabel(box) : "상자를 눌러 문제를 풀어요.";
+  renderBlockHint(box);
   el("choices").replaceChildren(...(selected?.choices ?? []).map(value =>
     button(String(value), () => {
       if (file.stage?.selected === selected) answer(box, value);
     }, "balloon")));
+}
+
+function renderBlockHint(box) {
+  const area = el("blockHint");
+  area.closest(".answer-tray").classList.toggle("has-hint-space", hintsEnabled(file));
+  const hint = box && hintsEnabled(file) ? regroupingHint(box) : null;
+  area.hidden = !hint;
+  area.replaceChildren();
+  if (!hint) return;
+
+  for (const [label, number] of [["", hint.left], [hint.op, hint.right]]) {
+    const row = document.createElement("div");
+    row.className = "block-row";
+    const value = document.createElement("b");
+    value.textContent = `${label} ${number}`.trim();
+    const pieces = document.createElement("span");
+    pieces.className = "block-pieces";
+    const tens = Math.floor(number / 10);
+    const ones = number % 10;
+    pieces.setAttribute("aria-label", `십의 묶음 ${tens}개, 낱개 ${ones}개`);
+    pieces.setAttribute("role", "img");
+    for (const [kind, count] of [["ten", tens], ["one", ones]]) {
+      for (let index = 0; index < count; index++) {
+        const piece = document.createElement("span");
+        piece.className = kind;
+        pieces.append(piece);
+      }
+    }
+    row.append(value, pieces);
+    area.append(row);
+  }
 }
 
 function renderPlay(updateChoices = true) {
@@ -235,7 +277,15 @@ function renderItemStatus(stage) {
 
 function selectBox(box) {
   const stage = file.stage;
-  if (!playable || !stage || stage.selected || !stage.boxes.includes(box)) return;
+  if (!playable || !stage || !stage.boxes.includes(box)) return;
+  if (stage.selected) {
+    if (stage.selected.id !== box.id) return;
+    stage.selected = null;
+    petChatter("다른 상자를 골라도 돼!", "다른 상자도 같이 풀어 보자! ♡");
+    renderChoices();
+    persist();
+    return;
+  }
   const intermediate = stage.mode === "intermediate";
   const count = rules.options[stage.mode];
   stage.selected = { id: box.id, until: stage.elapsed + rules.pauseMs, choices: makeChoices(box.answer, count, intermediate) };
